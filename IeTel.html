@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=11">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tel Protocol Freezing Issue Reproduction</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .contact-card {
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 15px;
+            background-color: #f9f9f9;
+        }
+        .phone-link {
+            color: #0066cc;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+        .warning {
+            background-color: #fff3cd;
+            color: #856404;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        button {
+            padding: 8px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+    <script>
+        // Define the function in the head section to ensure it's available
+        function callPhone(phoneNumber) {
+            try {
+                if (phoneNumber) {
+                    var obj;
+                    var santralNo = "tel:" + phoneNumber.replace(/(\+9)(?=0\d+)/, '0');
+                    obj = window.open(santralNo, "PhoneCall");
+                }
+            } catch (e) {
+                alert("Error making phone call: " + e.message);
+            }
+        }
+
+        // Function to add more contacts dynamically to increase complexity
+        function addMoreContacts() {
+            try {
+                var container = document.getElementById('contacts-container');
+                var phoneNumbers = [
+                    '+901234567893',
+                    '+901234567894',
+                    '+901234567895',
+                    '+901234567896',
+                    '+901234567897'
+                ];
+
+                var names = [
+                    'Sarah Wilson',
+                    'James Anderson',
+                    'Patricia Martinez',
+                    'Robert Garcia',
+                    'Jennifer Lopez'
+                ];
+
+                var departments = [
+                    'Human Resources',
+                    'Finance',
+                    'Operations',
+                    'IT Support',
+                    'Research & Development'
+                ];
+
+                for (var i = 0; i < 5; i++) {
+                    var card = document.createElement('div');
+                    card.className = 'contact-card';
+                    card.innerHTML = '<h3>' + names[i] + '</h3>' +
+                        '<p>Department: ' + departments[i] + '</p>' +
+                        '<p>Email: ' + names[i].toLowerCase().replace(' ', '.') + '@example.com</p>' +
+                        '<p>Phone: <span class="phone-link" onclick="callPhone(\'' + phoneNumbers[i] + '\')">' + phoneNumbers[i] + '</span></p>';
+                    container.appendChild(card);
+                }
+            } catch (e) {
+                alert("Error adding contacts: " + e.message);
+            }
+        }
+
+        // Run when DOM is loaded
+        window.onload = function() {
+            console.log("Page loaded in IE Mode. Warning: Multiple invocations of tel:// protocol may cause the browser to freeze.");
+        };
+    </script>
+</head>
+<body>
+    <h1>Contact Directory</h1>
+
+    <div class="warning">
+        <strong>Warning:</strong> This page demonstrates an issue where Edge browser may freeze after multiple tel:// protocol invocations in IE Mode.
+        Have Task Manager ready in case your browser becomes unresponsive.
+    </div>
+
+    <p>This page simulates a business application with multiple contact phone numbers that use the tel:// protocol.</p>
+
+    <button onclick="addMoreContacts()">Load More Contacts</button>
+
+    <div id="contacts-container">
+        <div class="contact-card">
+            <h3>John Smith</h3>
+            <p>Department: Sales</p>
+            <p>Email: john.smith@example.com</p>
+            <p>Phone: <span class="phone-link" onclick="callPhone('+901234567890')">+90 123 456 7890</span></p>
+        </div>
+
+        <div class="contact-card">
+            <h3>Emily Johnson</h3>
+            <p>Department: Customer Support</p>
+            <p>Email: emily.johnson@example.com</p>
+            <p>Phone: <span class="phone-link" onclick="callPhone('+901234567891')">+90 123 456 7891</span></p>
+        </div>
+
+        <div class="contact-card">
+            <h3>Michael Brown</h3>
+            <p>Department: Marketing</p>
+            <p>Email: michael.brown@example.com</p>
+            <p>Phone: <span class="phone-link" onclick="callPhone('+901234567892')">+90 123 456 7892</span></p>
+        </div>
+    </div>
+</body>
+</html>
