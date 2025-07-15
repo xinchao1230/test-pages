@@ -3,78 +3,274 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>M365 NURF Campaign Screenshots</title>
+    <title>M365 NURF Campaign Screenshots Viewer</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 20px;
             background-color: #f5f5f5;
+            height: 100vh;
+            overflow: hidden;
         }
+
         .container {
-            max-width: 1200px;
-            margin: 0 auto;
+            display: flex;
+            height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 300px;
             background: white;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-right: 1px solid #ddd;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
         }
-        h1 {
-            color: #2c3e50;
-            text-align: center;
-            margin-bottom: 30px;
+
+        .sidebar-header {
+            padding: 20px;
+            background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+            color: white;
         }
-        h2 {
-            color: #34495e;
-            border-bottom: 2px solid #3498db;
-            padding-bottom: 10px;
-            margin-top: 40px;
-        }
-        .campaign-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-        .campaign-item {
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 15px;
-            background: #fafafa;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        .campaign-item:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
-        .campaign-id {
-            font-weight: bold;
-            color: #2980b9;
+
+        .sidebar-header h1 {
+            font-size: 18px;
             margin-bottom: 10px;
-            font-size: 14px;
         }
-        .screenshot-container {
-            text-align: center;
+
+        .search-container {
+            position: relative;
             margin-top: 10px;
         }
+
+        .search-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .search-clear {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #666;
+            display: none;
+        }
+
+        .stats {
+            margin-top: 10px;
+            font-size: 12px;
+            color: #ecf0f1;
+        }
+
+        .category-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px 0;
+        }
+
+        .category-item {
+            padding: 10px 20px;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background-color 0.2s;
+        }
+
+        .category-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .category-item.active {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .category-name {
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .category-count {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .category-item.active .category-count {
+            color: #ecf0f1;
+        }
+
+        /* Subcategory sections in main content area */
+        .subcategory-section {
+            margin-bottom: 30px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+            width: 100%;
+            display: block; /* Ensure subcategory sections stack vertically */
+        }
+
+        .subcategory-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .subcategory-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .subcategory-description {
+            font-size: 12px;
+            opacity: 0.9;
+            margin: 0;
+        }
+
+        .subcategory-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            padding: 20px;
+            justify-content: flex-start;
+            align-items: flex-start;
+            min-height: fit-content;
+        }
+
+        /* Enhanced campaign item for subcategory view */
+        .campaign-item.in-subcategory {
+            width: 280px;
+            flex-shrink: 0;
+            margin-bottom: 0;
+            flex-basis: 280px;
+        }
+
+        /* Single category view without subcategories */
+        .single-category-view {
+            padding: 0;
+        }
+
+        /* Main content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .content-header {
+            background: white;
+            padding: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .content-title {
+            font-size: 24px;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .content-subtitle {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .content-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .campaign-grid {
+            display: block; /* Changed from grid to block for subcategory layout */
+        }
+
+        /* Grid layout only for single category view */
+        .campaign-grid.single-category-view {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .campaign-item {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .campaign-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        }
+
+        .campaign-header {
+            padding: 15px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #eee;
+        }
+
+        .campaign-id {
+            font-weight: 600;
+            color: #2980b9;
+            font-size: 14px;
+            word-break: break-all;
+        }
+
+        .screenshot-container {
+            padding: 15px;
+            text-align: center;
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
         .screenshot {
             max-width: 100%;
-            height: auto;
-            border: 1px solid #ccc;
+            max-height: 180px;
+            border: 1px solid #ddd;
             border-radius: 4px;
             cursor: pointer;
             transition: transform 0.2s;
         }
+
         .screenshot:hover {
             transform: scale(1.02);
         }
+
         .no-screenshot {
-            color: #7f8c8d;
+            color: #999;
             font-style: italic;
-            padding: 20px;
-            background: #ecf0f1;
+            text-align: center;
+            padding: 40px 20px;
+            background: #f8f9fa;
             border-radius: 4px;
         }
+
+        .loading {
+            color: #f39c12;
+            font-style: italic;
+        }
+
+        /* Modal */
         .modal {
             display: none;
             position: fixed;
@@ -85,13 +281,26 @@
             height: 100%;
             background-color: rgba(0,0,0,0.9);
         }
+
         .modal-content {
             margin: auto;
             display: block;
-            max-width: 90%;
-            max-height: 90%;
+            max-width: 95%;
+            max-height: 95%;
             margin-top: 2%;
         }
+
+        .modal-header {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: white;
+            background: rgba(0,0,0,0.7);
+            padding: 10px 15px;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
         .close {
             position: absolute;
             top: 15px;
@@ -101,249 +310,81 @@
             font-weight: bold;
             cursor: pointer;
         }
+
         .close:hover {
             color: #bbb;
         }
-        .loading {
-            color: #f39c12;
-            font-style: italic;
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+        .empty-state h3 {
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+
+        .empty-state p {
+            font-size: 14px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: 200px;
+            }
+            
+            .category-list {
+                display: flex;
+                overflow-x: auto;
+                overflow-y: hidden;
+                padding: 10px;
+            }
+            
+            .category-item {
+                min-width: 150px;
+                margin-right: 10px;
+                border-radius: 4px;
+                border-bottom: none;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>M365 NURF Campaign Screenshots</h1>
-        
-        <h2>M365OpenLinks Managed Banners</h2>
-        <div class="campaign-grid">
-            <div class="campaign-item">
-                <div class="campaign-id">M365OpenLinks_ManagedBanner</div>
-                <div class="screenshot-container">
-                    <div class="loading">Loading screenshot...</div>
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h1>NURF Campaign Viewer</h1>
+                <div class="search-container">
+                    <input type="text" class="search-input" placeholder="Search campaigns..." id="searchInput">
+                    <button class="search-clear" id="searchClear">&times;</button>
+                </div>
+                <div class="stats" id="statsDisplay">
+                    Loading campaigns...
                 </div>
             </div>
-            <div class="campaign-item">
-                <div class="campaign-id">M365OpenLinks_TeamsManagedBanner</div>
-                <div class="screenshot-container">
-                    <div class="loading">Loading screenshot...</div>
-                </div>
-            </div>
-        </div>
-
-        <h2>M365OpenLinks Inform Variants</h2>
-        <div class="campaign-grid">
-            <div class="campaign-item">
-                <div class="campaign-id">M365OpenLinks_InformVariant1</div>
-                <div class="screenshot-container">
-                    <div class="loading">Loading screenshot...</div>
-                </div>
-            </div>
-            <div class="campaign-item">
-                <div class="campaign-id">M365OpenLinks_InformVariant2</div>
-                <div class="screenshot-container">
-                    <div class="loading">Loading screenshot...</div>
-                </div>
-            </div>
-            <div class="campaign-item">
-                <div class="campaign-id">M365OpenLinks_InformVariant3</div>
-                <div class="screenshot-container">
-                    <div class="loading">Loading screenshot...</div>
-                </div>
-            </div>
-            <div class="campaign-item">
-                <div class="campaign-id">M365OpenLinks_InformVariant4</div>
-                <div class="screenshot-container">
-                    <div class="loading">Loading screenshot...</div>
-                </div>
-            </div>
-            <div class="campaign-item">
-                <div class="campaign-id">M365OpenLinks_TeamsInformPrompt</div>
-                <div class="screenshot-container">
-                    <div class="loading">Loading screenshot...</div>
-                </div>
+            <div class="category-list" id="categoryList">
+                <!-- Categories will be populated by JavaScript -->
             </div>
         </div>
 
-        <h2>M365OpenLinks OptOut Variants (Flyout)</h2>
-        <div class="campaign-grid">
-            <div class="campaign-item">
-                <div class="campaign-id">M365OpenLinks_OptOutVariant1</div>
-                <div class="screenshot-container">
-                    <div class="loading">Loading screenshot...</div>
-                </div>
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="content-header">
+                <div class="content-title" id="contentTitle">All Campaigns</div>
+                <div class="content-subtitle" id="contentSubtitle">Select a category to view campaigns</div>
             </div>
-            <div class="campaign-item">
-                <div class="campaign-id">M365OpenLinks_OptOutVariant2</div>
-                <div class="screenshot-container">
-                    <div class="loading">Loading screenshot...</div>
-                </div>
-            </div>
-            <div class="campaign-item">
-                <div class="campaign-id">M365OpenLinks_OptOutVariant3</div>
-                <div class="screenshot-container">
-                    <div class="loading">Loading screenshot...</div>
-                </div>
-            </div>
-            <div class="campaign-item">
-                <div class="campaign-id">M365OpenLinks_OptOutVariant4</div>
-                <div class="screenshot-container">
-                    <div class="loading">Loading screenshot...</div>
-                </div>
-            </div>
-            <div class="campaign-item">
-                <div class="campaign-id">M365OpenLinks_OptOutLastFlyOutBingVariant</div>
-                <div class="screenshot-container">
-                    <div class="loading">Loading screenshot...</div>
-                </div>
-            </div>
-        </div>
-
-        <h2>M365OpenLinks Sidebar OptOut Variants</h2>
-        <div class="campaign-grid">
-            <div class="campaign-item">
-                <div class="campaign-id">M365OpenLinks_OptOutSidebarAlwaysShow</div>
-                <div class="screenshot-container">
-                    <div class="loading">Loading screenshot...</div>
-                </div>
-            </div>
-            <div class="campaign-item">
-                <div class="campaign-id">M365OpenLinks_OptOutSidebarAutoHide</div>
-                <div class="screenshot-container">
-                    <div class="loading">Loading screenshot...</div>
-                </div>
-            </div>
-            <div class="campaign-item">
-                <div class="campaign-id">M365OpenLinks_OptOutSidebarAlwaysShowLast</div>
-                <div class="screenshot-container">
-                    <div class="loading">Loading screenshot...</div>
-                </div>
-            </div>
-            <div class="campaign-item">
-                <div class="campaign-id">M365OpenLinks_OptOutSidebarAutoHideLast</div>
-                <div class="screenshot-container">
-                    <div class="loading">Loading screenshot...</div>
-                </div>
-            </div>
-        </div>
-
-        <h2>M365OpenLinks OptOut Banner Variants</h2>
-        <div class="campaign-grid">
-            <div class="campaign-item">
-                <div class="campaign-id">M365OpenLinks_OptOutBannerVariant1</div>
-                <div class="screenshot-container">
-                    <div class="loading">Loading screenshot...</div>
-                </div>
-            </div>
-            <div class="campaign-item">
-                <div class="campaign-id">M365OpenLinks_OptOutBannerVariant2</div>
-                <div class="screenshot-container">
-                    <div class="loading">Loading screenshot...</div>
-                </div>
-            </div>
-            <div class="campaign-item">
-                <div class="campaign-id">M365OpenLinks_OptOutBannerVariant3</div>
-                <div class="screenshot-container">
-                    <div class="loading">Loading screenshot...</div>
-                </div>
-            </div>
-            <div class="campaign-item">
-                <div class="campaign-id">M365OpenLinks_OptOutBannerVariant4</div>
-                <div class="screenshot-container">
-                    <div class="loading">Loading screenshot...</div>
-                </div>
-            </div>
-        </div>
-
-        <h2>M365OpenLinks OptOut Modal Variants</h2>
-        <div class="campaign-grid">
-            <div class="campaign-item">
-                <div class="campaign-id">M365OpenLinks_OptOutModalVariant1</div>
-                <div class="screenshot-container">
-                    <div class="loading">Loading screenshot...</div>
-                </div>
-            </div>
-            <div class="campaign-item">
-                <div class="campaign-id">M365OpenLinks_OptOutModalVariant2</div>
-                <div class="screenshot-container">
-                    <div class="loading">Loading screenshot...</div>
-                </div>
-            </div>
-            <div class="campaign-item">
-                <div class="campaign-id">M365OpenLinks_OptOutModalVariant4</div>
-                <div class="screenshot-container">
-                    <div class="loading">Loading screenshot...</div>
-                </div>
-            </div>
-        </div>
-
-        <h2>M365OpenLinks Teams OptOut Variants</h2>
-        <div class="campaign-grid">
-            <div class="campaign-item">
-                <div class="campaign-id">M365OpenLinks_TeamsOptOutVariant1</div>
-                <div class="screenshot-container">
-                    <div class="loading">Loading screenshot...</div>
-                </div>
-            </div>
-            <div class="campaign-item">
-                <div class="campaign-id">M365OpenLinks_TeamsOptOutVariant2</div>
-                <div class="screenshot-container">
-                    <div class="loading">Loading screenshot...</div>
-                </div>
-            </div>
-            <div class="campaign-item">
-                <div class="campaign-id">M365OpenLinks_TeamsOptOutVariant3</div>
-                <div class="screenshot-container">
-                    <div class="loading">Loading screenshot...</div>
-                </div>
-            </div>
-        </div>
-
-        <h2>M365OpenLinks Teams OptOut Banner Variants</h2>
-        <div class="campaign-grid">
-            <div class="campaign-item">
-                <div class="campaign-id">M365OpenLinks_TeamsOptOutBannerVariant1</div>
-                <div class="screenshot-container">
-                    <div class="loading">Loading screenshot...</div>
-                </div>
-            </div>
-            <div class="campaign-item">
-                <div class="campaign-id">M365OpenLinks_TeamsOptOutBannerVariant2</div>
-                <div class="screenshot-container">
-                    <div class="loading">Loading screenshot...</div>
-                </div>
-            </div>
-            <div class="campaign-item">
-                <div class="campaign-id">M365OpenLinks_TeamsInformBanner</div>
-                <div class="screenshot-container">
-                    <div class="loading">Loading screenshot...</div>
-                </div>
-            </div>
-        </div>
-
-        <h2>M365OpenLinks Inform Banner Variants</h2>
-        <div class="campaign-grid">
-            <div class="campaign-item">
-                <div class="campaign-id">M365OpenLinks_InformBannerVariant1</div>
-                <div class="screenshot-container">
-                    <div class="loading">Loading screenshot...</div>
-                </div>
-            </div>
-            <div class="campaign-item">
-                <div class="campaign-id">M365OpenLinks_InformBannerVariant2</div>
-                <div class="screenshot-container">
-                    <div class="loading">Loading screenshot...</div>
-                </div>
-            </div>
-            <div class="campaign-item">
-                <div class="campaign-id">M365OpenLinks_InformBannerVariant3</div>
-                <div class="screenshot-container">
-                    <div class="loading">Loading screenshot...</div>
-                </div>
-            </div>
-            <div class="campaign-item">
-                <div class="campaign-id">M365OpenLinks_InformBannerVariant4</div>
-                <div class="screenshot-container">
-                    <div class="loading">Loading screenshot...</div>
+            <div class="content-body">
+                <div class="campaign-grid" id="campaignGrid">
+                    <!-- Campaigns will be populated by JavaScript -->
                 </div>
             </div>
         </div>
@@ -352,45 +393,779 @@
     <!-- Modal for full-size images -->
     <div id="imageModal" class="modal">
         <span class="close">&times;</span>
+        <div class="modal-header" id="modalHeader">Campaign Name</div>
         <img class="modal-content" id="modalImage">
     </div>
 
     <script>
-        // Modal functionality
+        // Campaign data organized by categories with subcategories
+        const campaignData = {
+            "M365OpenLinks": {
+                name: "M365 Open Links",
+                subcategories: {
+                    "managed_banners": {
+                        name: "M365OpenLinks Managed Banners",
+                        campaigns: [
+                            "M365OpenLinks_ManagedBanner",
+                            "M365OpenLinks_TeamsManagedBanner"
+                        ]
+                    },
+                    "inform_variants": {
+                        name: "M365OpenLinks Inform Variants",
+                        campaigns: [
+                            "M365OpenLinks_InformVariant1",
+                            "M365OpenLinks_InformVariant2",
+                            "M365OpenLinks_InformVariant3",
+                            "M365OpenLinks_InformVariant4",
+                            "M365OpenLinks_TeamsInformPrompt"
+                        ]
+                    },
+                    "optout_flyout": {
+                        name: "M365OpenLinks OptOut Variants (Flyout)",
+                        campaigns: [
+                            "M365OpenLinks_OptOutVariant1",
+                            "M365OpenLinks_OptOutVariant2",
+                            "M365OpenLinks_OptOutVariant3",
+                            "M365OpenLinks_OptOutVariant4",
+                            "M365OpenLinks_OptOutLastFlyOutBingVariant"
+                        ]
+                    },
+                    "optout_sidebar": {
+                        name: "M365OpenLinks Sidebar OptOut Variants",
+                        campaigns: [
+                            "M365OpenLinks_OptOutSidebarAlwaysShow",
+                            "M365OpenLinks_OptOutSidebarAutoHide",
+                            "M365OpenLinks_OptOutSidebarAlwaysShowLast",
+                            "M365OpenLinks_OptOutSidebarAutoHideLast"
+                        ]
+                    },
+                    "optout_banner": {
+                        name: "M365OpenLinks OptOut Banner Variants",
+                        campaigns: [
+                            "M365OpenLinks_OptOutBannerVariant1",
+                            "M365OpenLinks_OptOutBannerVariant2",
+                            "M365OpenLinks_OptOutBannerVariant3",
+                            "M365OpenLinks_OptOutBannerVariant4"
+                        ]
+                    },
+                    "optout_modal": {
+                        name: "M365OpenLinks OptOut Modal Variants",
+                        campaigns: [
+                            "M365OpenLinks_OptOutModalVariant1",
+                            "M365OpenLinks_OptOutModalVariant2",
+                            "M365OpenLinks_OptOutModalVariant4"
+                        ]
+                    },
+                    "teams_optout": {
+                        name: "M365OpenLinks Teams OptOut Variants",
+                        campaigns: [
+                            "M365OpenLinks_TeamsOptOutVariant1",
+                            "M365OpenLinks_TeamsOptOutVariant2",
+                            "M365OpenLinks_TeamsOptOutVariant3"
+                        ]
+                    },
+                    "teams_optout_banner": {
+                        name: "M365OpenLinks Teams OptOut Banner Variants",
+                        campaigns: [
+                            "M365OpenLinks_TeamsOptOutBannerVariant1",
+                            "M365OpenLinks_TeamsOptOutBannerVariant2",
+                            "M365OpenLinks_TeamsInformBanner"
+                        ]
+                    },
+                    "inform_banner": {
+                        name: "M365OpenLinks Inform Banner Variants",
+                        campaigns: [
+                            "M365OpenLinks_InformBannerVariant1",
+                            "M365OpenLinks_InformBannerVariant2",
+                            "M365OpenLinks_InformBannerVariant3",
+                            "M365OpenLinks_InformBannerVariant4"
+                        ]
+                    }
+                }
+            },
+            "EdgeMobile": {
+                name: "Edge Mobile",
+                subcategories: {
+                    "upsell": {
+                        name: "Mobile Upsell",
+                        campaigns: [
+                            "EdgeMobile_MobileUpsell_Email_AF_AnimationExtensionInstall",
+                            "EdgeMobile_MobileUpsell_Email_AF_AnimationExtensionInstallCN"
+                        ]
+                    }
+                }
+            },
+            "Fundamentals": {
+                name: "Fundamentals",
+                subcategories: {
+                    "security": {
+                        name: "Security & Protection",
+                        campaigns: ["Fundamentals_InterceptSuspFavorite"]
+                    },
+                    "database": {
+                        name: "Database Management",
+                        campaigns: ["Fundamentals_FN_ReclaimDBForEdgeProtocol"]
+                    }
+                }
+            },
+            "BingChina": {
+                name: "Bing China",
+                subcategories: {
+                    "default_browser": {
+                        name: "Default Browser Settings",
+                        campaigns: ["BingChina_BannerDefaultBrowser", "BingChina_UpsellDefaultSettingsFlyout"]
+                    }
+                }
+            },
+            "EnterpriseSecurity": {
+                name: "Enterprise Security",
+                subcategories: {
+                    "mitigations": {
+                        name: "Security Mitigations",
+                        campaigns: [
+                            "EnterpriseSecurity_MitigationBanner",
+                            "EnterpriseSecurity_CmdLineBadUrlMitigationBanner"
+                        ]
+                    }
+                }
+            },
+            "Bing": {
+                name: "Bing",
+                subcategories: {
+                    "settings": {
+                        name: "Recommended Settings",
+                        campaigns: [
+                            "Bing_RecommendedSettingsExplicitLaunch",
+                            "Bing_RecommendedSettingsExpandedTriggeringDialog"
+                        ]
+                    },
+                    "default_browser": {
+                        name: "Default Browser",
+                        campaigns: ["Bing_DefaultBrowserBannerCloseBtn"]
+                    },
+                    "instrumentation": {
+                        name: "Instrumentation",
+                        campaigns: ["Bing_Instrumentation"]
+                    }
+                }
+            },
+            "RecommendedSettings": {
+                name: "Recommended Settings",
+                subcategories: {
+                    "china": {
+                        name: "China",
+                        campaigns: ["RecommendedSettingsChina"]
+                    }
+                }
+            },
+            "Sync": {
+                name: "Sync Growth & Activation",
+                subcategories: {
+                    "account_consent": {
+                        name: "Account Level Consent",
+                        campaigns: [
+                            "SyncGrowthAndActivation_AccountLevelSyncConsentSyncOff",
+                            "SyncGrowthAndActivation_AccountLevelSyncConsentSyncOn"
+                        ]
+                    }
+                }
+            },
+            "OnRamp": {
+                name: "OnRamp",
+                subcategories: {
+                    "retrigger_fre": {
+                        name: "Retrigger FRE",
+                        campaigns: [
+                            "OnRamp_RetriggerFREOnEdgeVersionUpgradeViaExplicitLaunch",
+                            "OnRamp_RetriggerFRECodexCoPilotExplicitAprd",
+                            "OnRamp_RetriggerFRECodexCoPilotAutoAprd",
+                            "OnRamp_RetriggerFREOnEdgeVersionUpgradeViaProtocolLaunch",
+                            "OnRamp_RetriggerFREOnWinUpgradeViaProtocolLaunch",
+                            "OnRamp_RetriggerFREOnExplicitProtocolPDFLaunchForEdgePostDMA",
+                            "OnRamp_RetriggerFREForODDReconsentForEdgePostDMA",
+                            "OnRamp_RetriggerFREForSkippedFREUsers"
+                        ]
+                    },
+                    "continuous_import": {
+                        name: "Continuous Import",
+                        campaigns: [
+                            "OnRamp_CIExplicitLaunchBannerUpsell",
+                            "OnRamp_AdvanceCIConsent",
+                            "OnRamp_AdvanceCIConsentAndAutolaunch",
+                            "OnRamp_AdvanceCIConsentConversionAndThemes",
+                            "OnRamp_CIOpenTabs",
+                            "OnRamp_CIForEnterpriseBanner",
+                            "OnRamp_CIAutoLaunchDogFoodCampaign",
+                            "OnRamp_CIAllDataTypesEnabled",
+                            "OnRamp_CIUpsell_ProtocolLaunch_Banner"
+                        ]
+                    },
+                    "autolaunch": {
+                        name: "Auto Launch",
+                        campaigns: [
+                            "OnRamp_Autolaunch",
+                            "OnRamp_AutolaunchAndOpenTabsIfChromePreInstalled"
+                        ]
+                    },
+                    "experiments": {
+                        name: "Experiments",
+                        campaigns: [
+                            "OnRamp_NurturingViaProng_Experiment",
+                            "OnRamp_DriveTravelUsageViaProng_Experiment"
+                        ]
+                    },
+                    "other": {
+                        name: "Other",
+                        campaigns: [
+                            "OnRamp_ReTriggerOnWinUpgrade",
+                            "OnRamp_FastFollowSCFREAfterNDFRE"
+                        ]
+                    }
+                }
+            },
+            "EdgePreview": {
+                name: "Edge Preview",
+                subcategories: {
+                    "enrollment": {
+                        name: "Enrollment",
+                        campaigns: ["EdgePreview_EnrollmentNotification"]
+                    }
+                }
+            },
+            "Toolbar": {
+                name: "Toolbar",
+                subcategories: {
+                    "personalization": {
+                        name: "Personalization",
+                        campaigns: ["Toolbar_PersonalizationFlyout"]
+                    }
+                }
+            },
+            "NTP": {
+                name: "New Tab Page",
+                subcategories: {
+                    "campaigns": {
+                        name: "NTP Campaigns",
+                        campaigns: [
+                            "NTP_UpsellCampaign",
+                            "NTP_SettingsCampaign",
+                            "NTP_FunctionalCampaign"
+                        ]
+                    }
+                }
+            },
+            "Identity": {
+                name: "Identity",
+                subcategories: {
+                    "account_transfer": {
+                        name: "Account Transfer",
+                        campaigns: ["Identity_AccountTransfer"]
+                    }
+                }
+            },
+            "Shopping": {
+                name: "Shopping",
+                subcategories: {
+                    "cashback_rebates": {
+                        name: "Cashback & Rebates",
+                        campaigns: [
+                            "Shopping_EnableShoppingAssistance_Cashback_Success_Banner",
+                            "SHOPPING_AUTO_SHOW_REBATES_CONFIRMATION",
+                            "SHOPPING_AUTO_SHOW_REBATES_DEACTIVATED",
+                            "SHOPPING_AUTO_SHOW_REBATES_BING",
+                            "SHOPPING_AUTO_SHOW_PERSONALIZED_CASHBACK",
+                            "SHOPPING_AUTO_SHOW_PERSONALIZED_CASHBACK_CONFIRMATION",
+                            "SHOPPING_AUTO_SHOW_REBATES_ACTIVATION_FAILED",
+                            "SHOPPING_AUTO_SHOW_REBATES_SWITCHED_TO_MSA",
+                            "SHOPPING_AUTO_SHOW_ENROLL_TO_CASHBACK_CONFIRMATION_NOTIFICATION"
+                        ]
+                    },
+                    "price_tracking": {
+                        name: "Price Tracking & Comparison",
+                        campaigns: [
+                            "SHOPPING_AUTO_SHOW_URL_PARAM_PRICE_COMPARISON",
+                            "SHOPPING_AUTO_SHOW_URL_PARAM_PRICE_HISTORY"
+                        ]
+                    },
+                    "virtual_cards": {
+                        name: "Virtual Cards",
+                        campaigns: [
+                            "SHOPPING_AUTO_SHOW_VIRTUAL_CARD"
+                        ]
+                    },
+                    "bing_integration": {
+                        name: "Bing Integration",
+                        campaigns: [
+                            "SHOPPING_AUTO_SHOW_BING_SEARCH",
+                            "SHOPPING_AUTO_SHOW_BING_CAMPAIGN"
+                        ]
+                    },
+                    "other_features": {
+                        name: "Other Features",
+                        campaigns: [
+                            "SHOPPING_AUTO_SHOW_URL_PARAM_REBATES",
+                            "SHOPPING_AUTO_SHOW_ITEM_ADDED_TO_CART_FROM_OTHER_SELLER",
+                            "SHOPPING_OPEN_FLYOUT_FROM_EDGE_DRIVER",
+                            "SHOPPING_AUTO_SHOW_SUSTAINABILITY_PURCHASE",
+                            "SHOPPING_AUTO_SHOW_REWARDS_ACTIVATION_FAILED",
+                            "SHOPPING_AUTO_SHOW_REWARDS_SWITCHED_TO_MSA",
+                            "SHOPPING_AUTO_SHOW_SHOPRUNNER_CONFIRMATION"
+                        ]
+                    }
+                }
+            },
+            "AI_Theme": {
+                name: "AI Theme",
+                subcategories: {
+                    "user_consent": {
+                        name: "User Consent",
+                        campaigns: ["FN_AIThemeUserConsentDialog"]
+                    }
+                }
+            },
+            "EdgeOnMac": {
+                name: "Edge on Mac",
+                subcategories: {
+                    "default_browser": {
+                        name: "Default Browser",
+                        campaigns: ["EdgeOnMac_SetEdgeAsDefaultBrowserOnMac"]
+                    },
+                    "import": {
+                        name: "Import & Migration",
+                        campaigns: [
+                            "EdgeOnMac_OneTimeManualImportStatusSuccess",
+                            "EdgeOnMac_OneTimeManualImportStatusFailure",
+                            "EdgeOnMac_SafariPasswordImportFailure"
+                        ]
+                    }
+                }
+            },
+            "DualEngine": {
+                name: "Dual Engine",
+                subcategories: {
+                    "ie_mode": {
+                        name: "IE Mode",
+                        campaigns: [
+                            "DualEngine_IEModePrompt",
+                            "DualEngine_IEModeSwitch"
+                        ]
+                    },
+                    "pinning": {
+                        name: "Edge Pinning",
+                        campaigns: ["DualEngine_PinEdge"]
+                    }
+                }
+            },
+            "FunctionalNotifications": {
+                name: "Functional Notifications",
+                subcategories: {
+                    "password_security": {
+                        name: "Password & Security",
+                        campaigns: [
+                            "FN_Password_BreachInContextAlert",
+                            "FN_Password_BreachConsentDialog",
+                            "FN_PasswordBubbleView",
+                            "FN_CustomPasswordAuthDialog",
+                            "FN_PasswordAccountChooserDialog"
+                        ]
+                    },
+                    "identity_signin": {
+                        name: "Identity & Sign-in",
+                        campaigns: [
+                            "FN_DiceWebSignInInterceptionView",
+                            "FN_WebToBrowserPostSigninView",
+                            "FN_WebToBrowserSigninConsentView",
+                            "FN_ProfileCustomizationView",
+                            "FN_ProfileChooserView",
+                            "FN_AutoSigninFirstRunDialogView",
+                            "FN_AccountSelectionView",
+                            "FN_Identity_SignInReauthCTA",
+                            "FN_EdgeEasyAuthSignInPromptView",
+                            "FN_Modal_EdgeOneAuthSigninView",
+                            "FN_EdgeCustomizedHRDView",
+                            "FN_CompoundResigninSaveCardFlyout"
+                        ]
+                    },
+                    "extensions": {
+                        name: "Extensions",
+                        campaigns: [
+                            "FN_ExtWebstoreModal",
+                            "FN_UserSettingsExtensionDisabledBubbleView",
+                            "FN_ExtOtherStoreInstallModal",
+                            "FN_ExtInstallFrictionModal",
+                            "FN_ExtensionMigrationFlyout",
+                            "FN_ExtensionMenuView",
+                            "FN_ExtensionWidget",
+                            "FN_ExtensionInstallDialog",
+                            "FN_Modal_ExtensionInstalledDialog",
+                            "FN_Modal_ExtensionPopup",
+                            "FN_ExtFriction_Dialog"
+                        ]
+                    },
+                    "tabs_workspace": {
+                        name: "Tabs & Workspace",
+                        campaigns: [
+                            "FN_TabGroupHelperView",
+                            "FN_TabGroupAutogroupingBubbleView",
+                            "FN_TabHoverCardBubble",
+                            "FN_SetAsideSnoozeBubbleView",
+                            "FN_EdgeWorkspaceBubbleView",
+                            "FN_EdgeWorkspaceInviteBubbleView",
+                            "FN_EdgeWorkspaceErrorModal",
+                            "FN_BrowserExperiences_VerticalTabsFeedback",
+                            "FN_SendTabToSelfPromoView",
+                            "FN_SendTabToSelfMobileUpsell",
+                            "FN_SendTabToSelfToolbarBubble"
+                        ]
+                    },
+                    "performance": {
+                        name: "Performance & Efficiency",
+                        campaigns: [
+                            "FN_BatterySaverFlyout",
+                            "FN_HighEfficiencyFlyout",
+                            "FN_StoragePressureFlyout",
+                            "FN_LowDiskSpaceFlyout"
+                        ]
+                    },
+                    "media_content": {
+                        name: "Media & Content",
+                        campaigns: [
+                            "FN_MediaFlyout",
+                            "FN_ReadAloudSettingsBubbleView",
+                            "FN_CaptionBubble",
+                            "FN_EdgeTranslateBubbleView",
+                            "FN_VideoTranslate_ParametersSelection_Flyout",
+                            "FN_VideoTranslate_Installation_Flyout",
+                            "FN_VideoTranslate_Preparation_Flyout",
+                            "FN_VideoTranslate_Error_Flyouts"
+                        ]
+                    },
+                    "security_privacy": {
+                        name: "Security & Privacy",
+                        campaigns: [
+                            "FN_EdgeMitigateSuspiciousDSE",
+                            "FN_AdAndTrackerInfoBubbleView",
+                            "FN_ContentSettingImageView",
+                            "FN_GeoLocationPermissionFlyout",
+                            "FN_Modal_EdgePermission",
+                            "FN_DLP_Dialog",
+                            "FN_SplitScreenPermissionFlyout"
+                        ]
+                    },
+                    "shopping_payments": {
+                        name: "Shopping & Payments",
+                        campaigns: [
+                            "FN_PriceTrackingBubbleCoordinator",
+                            "FN_BNPLVirtualCardFlyout",
+                            "FN_VirtualCardFlyout",
+                            "FN_RoamingCardTokenizationFailureFlyout"
+                        ]
+                    },
+                    "ui_interface": {
+                        name: "UI & Interface",
+                        campaigns: [
+                            "FN_ChipController",
+                            "FN_FlyingIndicatorBubbleView",
+                            "FN_IndicatorInfoFlyout",
+                            "FN_ThrobberBubble",
+                            "FN_EmojiFlyout",
+                            "FN_ZoomBubbleView",
+                            "FN_ToolbarHoverFlyout",
+                            "FN_Overflow_Menu",
+                            "FN_HomeButtonFlyout"
+                        ]
+                    },
+                    "other": {
+                        name: "Other Features",
+                        campaigns: [
+                            "FN_EdgeReclaimDB",
+                            "FN_OnRamp_AutolaunchOnWindowsUnlock",
+                            "FN_OnRamp_PersonalizedLaunch",
+                            "FN_DualEngineSwitchMenuView",
+                            "FN_IgnoreCawView",
+                            "FN_IgnoreCawView2",
+                            "FN_IncognitoWindowCountView",
+                            "FN_ChromeLabsFlyout",
+                            "FN_GlobalErrorFlyout",
+                            "FN_FileSystemAccessFlyout",
+                            "FN_HCWithThemeBubble",
+                            "FN_InternetExplorerFlyout",
+                            "FN_IncognitoClearDataFlyout",
+                            "FN_DesktopMediaPickerDialogView",
+                            "FN_DownloadToolbarButtonView",
+                            "FN_CollaboratorHoverCard",
+                            "FN_EdgeIntentPickerBubbleView",
+                            "FN_EdgeWebshotBubbleView",
+                            "FN_EdgeSuperResolutionPopup",
+                            "FN_BookmarkBubleView",
+                            "FN_PrismExplorerBubble",
+                            "FN_EdgePwaConfirmationFlyout",
+                            "FN_WebAppPostInstallView",
+                            "FN_WebAppInstallPromptNotification",
+                            "FN_TryProfileSwitcherView",
+                            "FN_M365LinksOptOutAdjustSettingView",
+                            "FN_RelaunchRecommendedBubble",
+                            "FN_MiniCardBubbleView",
+                            "FN_HistoryHoverCardView",
+                            "FN_SmartSwitchBubbleView",
+                            "FN_EdgeFundamentals_AlwaysUpToDate",
+                            "FN_ShorelineHoverCard",
+                            "FN_ToastDialogFlyout",
+                            "FN_WdagFlyout",
+                            "FN_XboxGameModeFlyout",
+                            "FN_SessionAdminFlyout",
+                            "FN_ManagedSiteFlyout",
+                            "FN_QRGeneratorFlyout",
+                            "FN_CriticalNotificationFlyout",
+                            "FN_EdgeWorkSearchResultsBannerOnBingSERP",
+                            "FN_PageInfoPopup",
+                            "FN_IncognitoMenuView",
+                            "FN_AppBlockDialogView",
+                            "FN_AppPauseDialogView"
+                        ]
+                    }
+                }
+            }
+        };
+
+        // Global variables
+        let currentCategory = 'all';
+        let currentSearchTerm = '';
+        let filteredCampaigns = [];
+
+        // DOM elements
+        const categoryList = document.getElementById('categoryList');
+        const campaignGrid = document.getElementById('campaignGrid');
+        const contentTitle = document.getElementById('contentTitle');
+        const contentSubtitle = document.getElementById('contentSubtitle');
+        const statsDisplay = document.getElementById('statsDisplay');
+        const searchInput = document.getElementById('searchInput');
+        const searchClear = document.getElementById('searchClear');
         const modal = document.getElementById('imageModal');
         const modalImg = document.getElementById('modalImage');
+        const modalHeader = document.getElementById('modalHeader');
         const span = document.getElementsByClassName('close')[0];
 
-        // Function to open modal
-        function openModal(imgSrc, campaignId) {
-            modal.style.display = 'block';
-            modalImg.src = imgSrc;
-            modalImg.alt = campaignId;
+        // Helper function to get all campaigns from a category
+        function getAllCampaignsInCategory(categoryData) {
+            if (categoryData.campaigns) {
+                return categoryData.campaigns;
+            } else if (categoryData.subcategories) {
+                let allCampaigns = [];
+                Object.values(categoryData.subcategories).forEach(subcat => {
+                    allCampaigns = allCampaigns.concat(subcat.campaigns);
+                });
+                return allCampaigns;
+            }
+            return [];
         }
 
-        // Function to close modal
-        function closeModal() {
-            modal.style.display = 'none';
+        // Initialize the application
+        function init() {
+            populateCategories();
+            setupEventListeners();
+            showCategory('all');
         }
-        
-        // Close modal when clicking X
-        span.onclick = closeModal;
 
-        // Close modal when clicking outside
-        window.onclick = function(event) {
-            if (event.target == modal) {
-                closeModal();
+        // Populate category list
+        function populateCategories() {
+            let totalCampaigns = 0;
+            Object.values(campaignData).forEach(cat => {
+                totalCampaigns += getAllCampaignsInCategory(cat).length;
+            });
+
+            // Add "All" category
+            const allItem = createCategoryItem('all', 'All Campaigns', totalCampaigns, true);
+            categoryList.appendChild(allItem);
+
+            // Add individual categories (simplified - no subcategory UI in sidebar)
+            Object.keys(campaignData).forEach(categoryKey => {
+                const category = campaignData[categoryKey];
+                const allCampaigns = getAllCampaignsInCategory(category);
+                
+                const item = createCategoryItem(categoryKey, category.name, allCampaigns.length);
+                categoryList.appendChild(item);
+            });
+
+            updateStats(totalCampaigns, totalCampaigns);
+        }
+
+        // Create category list item (simplified)
+        function createCategoryItem(key, name, count, active = false) {
+            const item = document.createElement('div');
+            item.className = `category-item ${active ? 'active' : ''}`;
+            item.dataset.category = key;
+            
+            item.innerHTML = `
+                <div class="category-name">${name}</div>
+                <div class="category-count">${count} campaigns</div>
+            `;
+            
+            item.addEventListener('click', () => showCategory(key));
+            return item;
+        }
+
+        // Show category
+        function showCategory(categoryKey) {
+            currentCategory = categoryKey;
+            
+            // Update active category
+            document.querySelectorAll('.category-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            document.querySelector(`[data-category="${categoryKey}"]`).classList.add('active');
+            
+            // Get campaigns for category
+            let campaigns = [];
+            if (categoryKey === 'all') {
+                Object.values(campaignData).forEach(cat => {
+                    campaigns = campaigns.concat(getAllCampaignsInCategory(cat));
+                });
+                contentTitle.textContent = 'All Campaigns';
+                contentSubtitle.textContent = `Viewing all ${campaigns.length} campaigns`;
+            } else {
+                campaigns = getAllCampaignsInCategory(campaignData[categoryKey]);
+                contentTitle.textContent = campaignData[categoryKey].name;
+                contentSubtitle.textContent = `${campaigns.length} campaigns in this category`;
+            }
+            
+            // Apply search filter and render with subcategories
+            applySearch(campaigns);
+        }
+
+        // Apply search filter
+        function applySearch(campaigns = null) {
+            if (campaigns === null) {
+                // Get current campaigns
+                if (currentCategory === 'all') {
+                    campaigns = [];
+                    Object.values(campaignData).forEach(cat => {
+                        campaigns = campaigns.concat(getAllCampaignsInCategory(cat));
+                    });
+                } else {
+                    campaigns = getAllCampaignsInCategory(campaignData[currentCategory]);
+                }
+            }
+            
+            // Filter by search term
+            if (currentSearchTerm) {
+                filteredCampaigns = campaigns.filter(campaign => 
+                    campaign.toLowerCase().includes(currentSearchTerm.toLowerCase())
+                );
+            } else {
+                filteredCampaigns = campaigns;
+            }
+            
+            // Render with subcategory layout if applicable
+            if (currentCategory !== 'all' && campaignData[currentCategory].subcategories && !currentSearchTerm) {
+                renderCampaignsWithSubcategories();
+            } else {
+                renderCampaigns(filteredCampaigns);
+            }
+            
+            updateStats(filteredCampaigns.length, campaigns.length);
+        }
+
+        // Render campaigns with subcategory grouping
+        function renderCampaignsWithSubcategories() {
+            campaignGrid.innerHTML = '';
+            campaignGrid.className = 'campaign-grid';
+            const category = campaignData[currentCategory];
+            
+            if (!category.subcategories) {
+                renderCampaigns(filteredCampaigns);
+                return;
+            }
+            
+            // Create subcategory sections
+            Object.keys(category.subcategories).forEach(subcatKey => {
+                const subcategory = category.subcategories[subcatKey];
+                const subcatCampaigns = subcategory.campaigns;
+                
+                if (subcatCampaigns.length === 0) return;
+                
+                // Create subcategory section
+                const section = document.createElement('div');
+                section.className = 'subcategory-section';
+                
+                // Create header
+                const header = document.createElement('div');
+                header.className = 'subcategory-header';
+                header.innerHTML = `
+                    <h3 class="subcategory-title">${subcategory.name}</h3>
+                    <span class="subcategory-description">${subcatCampaigns.length} campaigns</span>
+                `;
+                
+                // Create flex grid for this subcategory (with wrapping)
+                const grid = document.createElement('div');
+                grid.className = 'subcategory-grid';
+                
+                subcatCampaigns.forEach(campaignId => {
+                    const item = createCampaignItem(campaignId);
+                    item.classList.add('in-subcategory');
+                    grid.appendChild(item);
+                });
+                
+                section.appendChild(header);
+                section.appendChild(grid);
+                campaignGrid.appendChild(section);
+            });
+            
+            if (campaignGrid.children.length === 0) {
+                const emptyState = document.createElement('div');
+                emptyState.className = 'empty-state';
+                emptyState.innerHTML = `
+                    <h3>No campaigns found</h3>
+                    <p>No campaigns in this category</p>
+                `;
+                campaignGrid.appendChild(emptyState);
             }
         }
-        
-        // Close modal when pressing ESC key
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'Escape') {
-                closeModal();
-            }
-        });
 
-        // Function to load screenshot
+        // Render campaigns (original function for single list view)
+        function renderCampaigns(campaigns) {
+            campaignGrid.innerHTML = '';
+            campaignGrid.className = 'campaign-grid single-category-view';
+            
+            if (campaigns.length === 0) {
+                const emptyState = document.createElement('div');
+                emptyState.className = 'empty-state';
+                emptyState.innerHTML = `
+                    <h3>No campaigns found</h3>
+                    <p>${currentSearchTerm ? 'Try adjusting your search terms' : 'No campaigns in this category'}</p>
+                `;
+                campaignGrid.appendChild(emptyState);
+                return;
+            }
+            
+            campaigns.forEach(campaignId => {
+                const item = createCampaignItem(campaignId);
+                campaignGrid.appendChild(item);
+            });
+        }
+
+        // Create campaign item
+        function createCampaignItem(campaignId) {
+            const item = document.createElement('div');
+            item.className = 'campaign-item';
+            
+            item.innerHTML = `
+                <div class="campaign-header">
+                    <div class="campaign-id">${campaignId}</div>
+                </div>
+                <div class="screenshot-container">
+                    <div class="loading">Loading screenshot...</div>
+                </div>
+            `;
+            
+            // Load screenshot
+            const container = item.querySelector('.screenshot-container');
+            loadScreenshot(campaignId, container);
+            
+            return item;
+        }
+
+        // Load screenshot
         function loadScreenshot(campaignId, container) {
             const img = document.createElement('img');
             img.className = 'screenshot';
@@ -406,19 +1181,85 @@
             };
             
             img.onerror = function() {
-                container.innerHTML = '<div class="no-screenshot">Screenshot not available</div>';
+                // Try to load Default.png as fallback
+                const defaultImg = document.createElement('img');
+                defaultImg.className = 'screenshot';
+                defaultImg.alt = `${campaignId} (Default)`;
+                defaultImg.src = 'screenshots/Default.png';
+                
+                defaultImg.onload = function() {
+                    container.innerHTML = '';
+                    container.appendChild(defaultImg);
+                    defaultImg.onclick = function() {
+                        openModal(defaultImg.src, campaignId);
+                    };
+                };
+                
+                defaultImg.onerror = function() {
+                    // If Default.png also doesn't exist, show no screenshot message
+                    container.innerHTML = '<div class="no-screenshot">Screenshot not available</div>';
+                };
             };
         }
 
-        // Load all screenshots when page loads
-        document.addEventListener('DOMContentLoaded', function() {
-            const campaignItems = document.querySelectorAll('.campaign-item');
-            campaignItems.forEach(item => {
-                const campaignId = item.querySelector('.campaign-id').textContent;
-                const container = item.querySelector('.screenshot-container');
-                loadScreenshot(campaignId, container);
+        // Open modal
+        function openModal(imgSrc, campaignId) {
+            modal.style.display = 'block';
+            modalImg.src = imgSrc;
+            modalImg.alt = campaignId;
+            modalHeader.textContent = campaignId;
+        }
+
+        // Update stats
+        function updateStats(shown, total) {
+            if (currentSearchTerm) {
+                statsDisplay.textContent = `Showing ${shown} of ${total} campaigns`;
+            } else {
+                statsDisplay.textContent = `${total} campaigns total`;
+            }
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Search functionality
+            searchInput.addEventListener('input', (e) => {
+                currentSearchTerm = e.target.value.trim();
+                searchClear.style.display = currentSearchTerm ? 'block' : 'none';
+                applySearch();
             });
-        });
+            
+            searchClear.addEventListener('click', () => {
+                searchInput.value = '';
+                currentSearchTerm = '';
+                searchClear.style.display = 'none';
+                applySearch();
+            });
+            
+            // Modal functionality
+            span.onclick = function() {
+                modal.style.display = 'none';
+            }
+            
+            window.onclick = function(event) {
+                if (event.target == modal) {
+                    modal.style.display = 'none';
+                }
+            }
+            
+            // Keyboard shortcuts
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    modal.style.display = 'none';
+                }
+                if (e.ctrlKey && e.key === 'f') {
+                    e.preventDefault();
+                    searchInput.focus();
+                }
+            });
+        }
+
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
 </html>
