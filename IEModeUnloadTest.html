@@ -18,6 +18,9 @@
       margin: 0 auto;
       background: white;
       padding: 30px;
+      /* IE fallback */
+      border: 1px solid #ddd;
+      /* Modern browsers */
       border-radius: 8px;
       box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     }
@@ -29,6 +32,9 @@
     .warning {
       background-color: #fff3cd;
       border: 1px solid #ffeaa7;
+      /* IE fallback */
+      border: 1px solid #ffeaa7;
+      /* Modern browsers */
       border-radius: 4px;
       padding: 15px;
       margin-bottom: 30px;
@@ -36,6 +42,9 @@
     }
     .test-section {
       border: 2px solid #ecf0f1;
+      /* IE fallback */
+      border: 2px solid #ecf0f1;
+      /* Modern browsers */
       border-radius: 8px;
       padding: 25px;
       margin: 25px 0;
@@ -48,19 +57,38 @@
       padding-bottom: 10px;
     }
     .button-group {
+      /* IE fallback - use text-align instead of flex */
+      text-align: center;
+      /* Modern browsers with flex support */
+      display: -webkit-flex;
+      display: -ms-flexbox;
       display: flex;
       gap: 15px;
       justify-content: center;
       margin: 20px 0;
       flex-wrap: wrap;
     }
+    
+    /* IE fallback for button spacing */
+    .button-group button {
+      margin: 5px;
+    }
     button {
       padding: 12px 20px;
+      border: none;
+      /* IE fallback */
+      border: 1px solid #ddd;
+      /* Modern browsers */
       border: none;
       border-radius: 4px;
       font-size: 16px;
       font-weight: bold;
       cursor: pointer;
+      /* IE fallback - no transition */
+      /* Modern browsers */
+      -webkit-transition: background-color 0.3s;
+      -moz-transition: background-color 0.3s;
+      -o-transition: background-color 0.3s;
       transition: background-color 0.3s;
       min-width: 140px;
     }
@@ -154,21 +182,39 @@
       cursor: not-allowed;
     }
     .mode-selector {
+      /* IE fallback - use text-align instead of flex */
+      text-align: center;
+      /* Modern browsers with flex support */
+      display: -webkit-flex;
+      display: -ms-flexbox;
       display: flex;
       gap: 10px;
       justify-content: center;
       margin: 20px 0;
       flex-wrap: wrap;
     }
+    
+    /* IE fallback for mode button spacing */
+    .mode-selector .mode-btn {
+      margin: 5px;
+    }
     .mode-btn {
       padding: 8px 16px;
       border: 2px solid #3498db;
+      /* IE fallback */
+      border: 2px solid #3498db;
+      /* Modern browsers */
       border-radius: 4px;
       background-color: white;
       color: #3498db;
       font-size: 14px;
       font-weight: bold;
       cursor: pointer;
+      /* IE fallback - no transition */
+      /* Modern browsers */
+      -webkit-transition: all 0.3s;
+      -moz-transition: all 0.3s;
+      -o-transition: all 0.3s;
       transition: all 0.3s;
     }
     .mode-btn:hover {
@@ -204,10 +250,10 @@
     }
   </style>
   <script>
-    let countdownTimer = null;
-    let autoCloseTimer = null;
-    let windowOpenTimer = null;
-    let currentUnloadMode = 'alert'; // 'alert', 'window', or 'both'
+    var countdownTimer = null;
+    var autoCloseTimer = null;
+    var windowOpenTimer = null;
+    var currentUnloadMode = 'alert'; // 'alert', 'window', or 'both'
     
     // Dynamic unload event handler
     function handleUnload() {
@@ -221,25 +267,57 @@
       }
     }
     
-    // Add unload event listener
-    window.addEventListener('unload', handleUnload);
+    // Add unload event listener - IE compatible
+    if (window.addEventListener) {
+      window.addEventListener('unload', handleUnload, false);
+    } else if (window.attachEvent) {
+      window.attachEvent('onunload', handleUnload);
+    }
+    
+    // IE-compatible class manipulation
+    function hasClass(element, className) {
+      return element.className.indexOf(className) !== -1;
+    }
+    
+    function addClass(element, className) {
+      if (!hasClass(element, className)) {
+        element.className += (element.className ? ' ' : '') + className;
+      }
+    }
+    
+    function removeClass(element, className) {
+      var regex = new RegExp('(^|\\s)' + className + '(\\s|$)', 'g');
+      element.className = element.className.replace(regex, ' ').replace(/\s+/g, ' ').replace(/^\s|\s$/g, '');
+    }
+    
+    function toggleClass(element, className, condition) {
+      if (condition) {
+        addClass(element, className);
+      } else {
+        removeClass(element, className);
+      }
+    }
     
     // Set unload mode
     function setUnloadMode(mode) {
       currentUnloadMode = mode;
       
-      // Update button states
-      document.getElementById('alertModeBtn').classList.toggle('active', mode === 'alert');
-      document.getElementById('windowModeBtn').classList.toggle('active', mode === 'window');
-      document.getElementById('bothModeBtn').classList.toggle('active', mode === 'both');
+      // Update button states - IE compatible
+      var alertBtn = document.getElementById('alertModeBtn');
+      var windowBtn = document.getElementById('windowModeBtn');
+      var bothBtn = document.getElementById('bothModeBtn');
+      
+      toggleClass(alertBtn, 'active', mode === 'alert');
+      toggleClass(windowBtn, 'active', mode === 'window');
+      toggleClass(bothBtn, 'active', mode === 'both');
       
       // Update status display
-      const statusText = {
+      var statusText = {
         'alert': 'Alert on unload',
         'window': 'Open Bing.com on unload',
         'both': 'Alert + Open Bing.com on unload'
       };
-      document.getElementById('currentMode').textContent = statusText[mode];
+      document.getElementById('currentMode').innerHTML = statusText[mode];
     }
     
     // Original save function (immediate)
@@ -252,24 +330,24 @@
     
     // Delayed save function for background testing
     function delayedSave() {
-      const button = document.getElementById('delayedBtn');
-      const countdownElement = document.getElementById('countdown');
+      var button = document.getElementById('delayedBtn');
+      var countdownElement = document.getElementById('countdown');
       
       button.disabled = true;
-      button.textContent = 'Closing Soon...';
-      countdownElement.classList.remove('hidden');
+      button.innerHTML = 'Closing Soon...';
+      removeClass(countdownElement, 'hidden');
       
-      let seconds = 5;
-      countdownElement.textContent = `Window will close in ${seconds} seconds...`;
+      var seconds = 5;
+      countdownElement.innerHTML = 'Window will close in ' + seconds + ' seconds...';
       
-      countdownTimer = setInterval(() => {
+      countdownTimer = setInterval(function() {
         seconds--;
         if (seconds > 0) {
-          countdownElement.textContent = `Window will close in ${seconds} seconds...`;
+          countdownElement.innerHTML = 'Window will close in ' + seconds + ' seconds...';
         } else {
           clearInterval(countdownTimer);
-          countdownElement.textContent = 'Closing now!';
-          setTimeout(() => {
+          countdownElement.innerHTML = 'Closing now!';
+          setTimeout(function() {
             window.close();
             if (currentUnloadMode !== 'window') {
               alert('stuck!!!');
@@ -281,24 +359,24 @@
     
     // Window open on unload test
     function delayedWindowOpen() {
-      const button = document.getElementById('windowOpenBtn');
-      const windowCountdownElement = document.getElementById('windowCountdown');
+      var button = document.getElementById('windowOpenBtn');
+      var windowCountdownElement = document.getElementById('windowCountdown');
       
       button.disabled = true;
-      button.textContent = 'Opening Soon...';
-      windowCountdownElement.classList.remove('hidden');
+      button.innerHTML = 'Opening Soon...';
+      removeClass(windowCountdownElement, 'hidden');
       
-      let seconds = 5;
-      windowCountdownElement.textContent = `Will navigate away in ${seconds} seconds...`;
+      var seconds = 5;
+      windowCountdownElement.innerHTML = 'Will navigate away in ' + seconds + ' seconds...';
       
-      windowOpenTimer = setInterval(() => {
+      windowOpenTimer = setInterval(function() {
         seconds--;
         if (seconds > 0) {
-          windowCountdownElement.textContent = `Will navigate away in ${seconds} seconds...`;
+          windowCountdownElement.innerHTML = 'Will navigate away in ' + seconds + ' seconds...';
         } else {
           clearInterval(windowOpenTimer);
-          windowCountdownElement.textContent = 'Navigating now!';
-          setTimeout(() => {
+          windowCountdownElement.innerHTML = 'Navigating now!';
+          setTimeout(function() {
             window.location.href = 'index.html'; // Navigate away to trigger unload
           }, 500);
         }
@@ -307,24 +385,24 @@
     
     // Auto close function (from AutoClose.html)
     function startAutoClose() {
-      const button = document.getElementById('autoCloseBtn');
-      const autoCountdownElement = document.getElementById('autoCountdown');
+      var button = document.getElementById('autoCloseBtn');
+      var autoCountdownElement = document.getElementById('autoCountdown');
       
       button.disabled = true;
-      button.textContent = 'Auto Closing...';
-      autoCountdownElement.classList.remove('hidden');
+      button.innerHTML = 'Auto Closing...';
+      removeClass(autoCountdownElement, 'hidden');
       
-      let seconds = 5;
-      autoCountdownElement.textContent = `This page will close in ${seconds} seconds`;
+      var seconds = 5;
+      autoCountdownElement.innerHTML = 'This page will close in ' + seconds + ' seconds';
       
-      autoCloseTimer = setInterval(() => {
+      autoCloseTimer = setInterval(function() {
         seconds--;
         if (seconds > 0) {
-          autoCountdownElement.textContent = `This page will close in ${seconds} seconds`;
+          autoCountdownElement.innerHTML = 'This page will close in ' + seconds + ' seconds';
         } else {
           clearInterval(autoCloseTimer);
-          autoCountdownElement.textContent = 'Closing now...';
-          setTimeout(() => {
+          autoCountdownElement.innerHTML = 'Closing now...';
+          setTimeout(function() {
             window.close();
           }, 500);
         }
@@ -338,12 +416,12 @@
         countdownTimer = null;
       }
       
-      const button = document.getElementById('delayedBtn');
-      const countdownElement = document.getElementById('countdown');
+      var button = document.getElementById('delayedBtn');
+      var countdownElement = document.getElementById('countdown');
       
       button.disabled = false;
-      button.textContent = 'Delayed Submit (5s)';
-      countdownElement.classList.add('hidden');
+      button.innerHTML = 'Delayed Submit (5s)';
+      addClass(countdownElement, 'hidden');
     }
     
     // Cancel auto close
@@ -353,12 +431,12 @@
         autoCloseTimer = null;
       }
       
-      const button = document.getElementById('autoCloseBtn');
-      const autoCountdownElement = document.getElementById('autoCountdown');
+      var button = document.getElementById('autoCloseBtn');
+      var autoCountdownElement = document.getElementById('autoCountdown');
       
       button.disabled = false;
-      button.textContent = 'Start Auto Close (5s)';
-      autoCountdownElement.classList.add('hidden');
+      button.innerHTML = 'Start Auto Close (5s)';
+      addClass(autoCountdownElement, 'hidden');
     }
     
     // Cancel window open
@@ -368,18 +446,38 @@
         windowOpenTimer = null;
       }
       
-      const button = document.getElementById('windowOpenBtn');
-      const windowCountdownElement = document.getElementById('windowCountdown');
+      var button = document.getElementById('windowOpenBtn');
+      var windowCountdownElement = document.getElementById('windowCountdown');
       
       button.disabled = false;
-      button.textContent = 'Delayed Navigate (5s)';
-      windowCountdownElement.classList.add('hidden');
+      button.innerHTML = 'Delayed Navigate (5s)';
+      addClass(windowCountdownElement, 'hidden');
     }
     
-    // Initialize default mode
-    window.addEventListener('load', function() {
-      setUnloadMode('alert');
-    });
+    // Initialize default mode - IE compatible
+    if (window.addEventListener) {
+      window.addEventListener('load', function() {
+        setUnloadMode('alert');
+        checkIECompatibility();
+      }, false);
+    } else if (window.attachEvent) {
+      window.attachEvent('onload', function() {
+        setUnloadMode('alert');
+        checkIECompatibility();
+      });
+    }
+    
+    // Check IE compatibility and show appropriate messages
+    function checkIECompatibility() {
+      var isIE = navigator.userAgent.indexOf('MSIE') !== -1 || navigator.userAgent.indexOf('Trident') !== -1;
+      var isEdgeIEMode = navigator.userAgent.indexOf('Edge') !== -1 && document.documentMode;
+      
+      if (isIE || isEdgeIEMode) {
+        console.log('Running in IE or IE Mode - Compatibility measures activated');
+      } else {
+        console.log('Not running in IE Mode - Some features may not work as expected');
+      }
+    }
   </script>
 </head>
 <body>
