@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Comprehensive Window Test Page</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      margin: 0;
+      padding: 30px;
+      background-color: #f5f5f5;
+      color: #333;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #2c3e50;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .warning {
+      background-color: #fff3cd;
+      border: 1px solid #ffeaa7;
+      border-radius: 4px;
+      padding: 15px;
+      margin-bottom: 30px;
+      color: #856404;
+    }
+    .test-section {
+      border: 2px solid #ecf0f1;
+      border-radius: 8px;
+      padding: 25px;
+      margin: 25px 0;
+      background-color: #fafafa;
+    }
+    .test-section h2 {
+      color: #2c3e50;
+      margin-top: 0;
+      border-bottom: 2px solid #3498db;
+      padding-bottom: 10px;
+    }
+    .button-group {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      margin: 20px 0;
+      flex-wrap: wrap;
+    }
+    button {
+      padding: 12px 20px;
+      border: none;
+      border-radius: 4px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      min-width: 140px;
+    }
+    .btn-primary {
+      background-color: #3498db;
+      color: white;
+    }
+    .btn-primary:hover {
+      background-color: #2980b9;
+    }
+    .btn-delayed {
+      background-color: #e67e22;
+      color: white;
+    }
+    .btn-delayed:hover {
+      background-color: #d35400;
+    }
+    .btn-delayed:disabled {
+      background-color: #bdc3c7;
+      cursor: not-allowed;
+    }
+    .btn-auto {
+      background-color: #e74c3c;
+      color: white;
+    }
+    .btn-auto:hover {
+      background-color: #c0392b;
+    }
+    .btn-auto:disabled {
+      background-color: #bdc3c7;
+      cursor: not-allowed;
+    }
+    .btn-cancel {
+      background-color: #95a5a6;
+      color: white;
+    }
+    .btn-cancel:hover {
+      background-color: #7f8c8d;
+    }
+    .instructions {
+      background-color: #e8f4f8;
+      border: 1px solid #b3d9e8;
+      border-radius: 4px;
+      padding: 20px;
+      margin: 20px 0;
+    }
+    .instructions h3 {
+      margin-top: 0;
+      color: #2c3e50;
+    }
+    .instructions ol, .instructions ul {
+      margin-bottom: 0;
+    }
+    .countdown {
+      font-size: 18px;
+      font-weight: bold;
+      color: #e67e22;
+      text-align: center;
+      margin: 15px 0;
+      padding: 10px;
+      background-color: #fff;
+      border-radius: 4px;
+      border: 2px solid #f39c12;
+    }
+    .countdown.hidden {
+      display: none;
+    }
+    .auto-countdown {
+      font-size: 24px;
+      font-weight: bold;
+      color: #e74c3c;
+      text-align: center;
+      margin: 15px 0;
+      padding: 15px;
+      background-color: #fff;
+      border-radius: 4px;
+      border: 2px solid #e74c3c;
+    }
+    .auto-countdown.hidden {
+      display: none;
+    }
+    .btn-window {
+      background-color: #9b59b6;
+      color: white;
+    }
+    .btn-window:hover {
+      background-color: #8e44ad;
+    }
+    .btn-window:disabled {
+      background-color: #bdc3c7;
+      cursor: not-allowed;
+    }
+    .mode-selector {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin: 20px 0;
+      flex-wrap: wrap;
+    }
+    .mode-btn {
+      padding: 8px 16px;
+      border: 2px solid #3498db;
+      border-radius: 4px;
+      background-color: white;
+      color: #3498db;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .mode-btn:hover {
+      background-color: #ecf0f1;
+    }
+    .mode-btn.active {
+      background-color: #3498db;
+      color: white;
+    }
+    .status-display {
+      text-align: center;
+      margin: 15px 0;
+      padding: 10px;
+      background-color: #f8f9fa;
+      border-radius: 4px;
+      border-left: 4px solid #3498db;
+      font-weight: bold;
+      color: #2c3e50;
+    }
+    .window-countdown {
+      font-size: 18px;
+      font-weight: bold;
+      color: #9b59b6;
+      text-align: center;
+      margin: 15px 0;
+      padding: 10px;
+      background-color: #fff;
+      border-radius: 4px;
+      border: 2px solid #9b59b6;
+    }
+    .window-countdown.hidden {
+      display: none;
+    }
+  </style>
+  <script>
+    let countdownTimer = null;
+    let autoCloseTimer = null;
+    let windowOpenTimer = null;
+    let currentUnloadMode = 'alert'; // 'alert', 'window', or 'both'
+    
+    // Dynamic unload event handler
+    function handleUnload() {
+      if (currentUnloadMode === 'alert') {
+        alert('Page is unloading - Alert triggered!');
+      } else if (currentUnloadMode === 'window') {
+        window.open('https://www.bing.com');
+      } else if (currentUnloadMode === 'both') {
+        alert('Page is unloading - Alert triggered!');
+        window.open('https://www.bing.com');
+      }
+    }
+    
+    // Add unload event listener
+    window.addEventListener('unload', handleUnload);
+    
+    // Set unload mode
+    function setUnloadMode(mode) {
+      currentUnloadMode = mode;
+      
+      // Update button states
+      document.getElementById('alertModeBtn').classList.toggle('active', mode === 'alert');
+      document.getElementById('windowModeBtn').classList.toggle('active', mode === 'window');
+      document.getElementById('bothModeBtn').classList.toggle('active', mode === 'both');
+      
+      // Update status display
+      const statusText = {
+        'alert': 'Alert on unload',
+        'window': 'Open Bing.com on unload',
+        'both': 'Alert + Open Bing.com on unload'
+      };
+      document.getElementById('currentMode').textContent = statusText[mode];
+    }
+    
+    // Original save function (immediate)
+    function save() {
+      window.close();
+      if (currentUnloadMode !== 'window') {
+        alert('stuck!!!');
+      }
+    }
+    
+    // Delayed save function for background testing
+    function delayedSave() {
+      const button = document.getElementById('delayedBtn');
+      const countdownElement = document.getElementById('countdown');
+      
+      button.disabled = true;
+      button.textContent = 'Closing Soon...';
+      countdownElement.classList.remove('hidden');
+      
+      let seconds = 5;
+      countdownElement.textContent = `Window will close in ${seconds} seconds...`;
+      
+      countdownTimer = setInterval(() => {
+        seconds--;
+        if (seconds > 0) {
+          countdownElement.textContent = `Window will close in ${seconds} seconds...`;
+        } else {
+          clearInterval(countdownTimer);
+          countdownElement.textContent = 'Closing now!';
+          setTimeout(() => {
+            window.close();
+            if (currentUnloadMode !== 'window') {
+              alert('stuck!!!');
+            }
+          }, 500);
+        }
+      }, 1000);
+    }
+    
+    // Window open on unload test
+    function delayedWindowOpen() {
+      const button = document.getElementById('windowOpenBtn');
+      const windowCountdownElement = document.getElementById('windowCountdown');
+      
+      button.disabled = true;
+      button.textContent = 'Opening Soon...';
+      windowCountdownElement.classList.remove('hidden');
+      
+      let seconds = 5;
+      windowCountdownElement.textContent = `Will navigate away in ${seconds} seconds...`;
+      
+      windowOpenTimer = setInterval(() => {
+        seconds--;
+        if (seconds > 0) {
+          windowCountdownElement.textContent = `Will navigate away in ${seconds} seconds...`;
+        } else {
+          clearInterval(windowOpenTimer);
+          windowCountdownElement.textContent = 'Navigating now!';
+          setTimeout(() => {
+            window.location.href = 'index.html'; // Navigate away to trigger unload
+          }, 500);
+        }
+      }, 1000);
+    }
+    
+    // Auto close function (from AutoClose.html)
+    function startAutoClose() {
+      const button = document.getElementById('autoCloseBtn');
+      const autoCountdownElement = document.getElementById('autoCountdown');
+      
+      button.disabled = true;
+      button.textContent = 'Auto Closing...';
+      autoCountdownElement.classList.remove('hidden');
+      
+      let seconds = 5;
+      autoCountdownElement.textContent = `This page will close in ${seconds} seconds`;
+      
+      autoCloseTimer = setInterval(() => {
+        seconds--;
+        if (seconds > 0) {
+          autoCountdownElement.textContent = `This page will close in ${seconds} seconds`;
+        } else {
+          clearInterval(autoCloseTimer);
+          autoCountdownElement.textContent = 'Closing now...';
+          setTimeout(() => {
+            window.close();
+          }, 500);
+        }
+      }, 1000);
+    }
+    
+    // Cancel delayed save
+    function cancelDelayed() {
+      if (countdownTimer) {
+        clearInterval(countdownTimer);
+        countdownTimer = null;
+      }
+      
+      const button = document.getElementById('delayedBtn');
+      const countdownElement = document.getElementById('countdown');
+      
+      button.disabled = false;
+      button.textContent = 'Delayed Submit (5s)';
+      countdownElement.classList.add('hidden');
+    }
+    
+    // Cancel auto close
+    function cancelAutoClose() {
+      if (autoCloseTimer) {
+        clearInterval(autoCloseTimer);
+        autoCloseTimer = null;
+      }
+      
+      const button = document.getElementById('autoCloseBtn');
+      const autoCountdownElement = document.getElementById('autoCountdown');
+      
+      button.disabled = false;
+      button.textContent = 'Start Auto Close (5s)';
+      autoCountdownElement.classList.add('hidden');
+    }
+    
+    // Cancel window open
+    function cancelWindowOpen() {
+      if (windowOpenTimer) {
+        clearInterval(windowOpenTimer);
+        windowOpenTimer = null;
+      }
+      
+      const button = document.getElementById('windowOpenBtn');
+      const windowCountdownElement = document.getElementById('windowCountdown');
+      
+      button.disabled = false;
+      button.textContent = 'Delayed Navigate (5s)';
+      windowCountdownElement.classList.add('hidden');
+    }
+    
+    // Initialize default mode
+    window.addEventListener('load', function() {
+      setUnloadMode('alert');
+    });
+  </script>
+</head>
+<body>
+  <div class="container">
+    <h1>Comprehensive Window Test Page</h1>
+    
+    <div class="warning">
+      <strong>Important:</strong> This page should be opened with IE Mode to test all functionalities properly!
+    </div>
+    
+    <!-- Unload Mode Selector -->
+    <div class="test-section">
+      <h2>⚙️ Unload Behavior Mode</h2>
+      <div class="instructions">
+        <p>Choose what happens when the page unloads (when closing window or navigating away):</p>
+      </div>
+      
+      <div class="mode-selector">
+        <button id="alertModeBtn" class="mode-btn" onclick="setUnloadMode('alert')">Alert Mode</button>
+        <button id="windowModeBtn" class="mode-btn" onclick="setUnloadMode('window')">Open Bing Mode</button>
+        <button id="bothModeBtn" class="mode-btn" onclick="setUnloadMode('both')">Both Mode</button>
+      </div>
+      
+      <div class="status-display">
+        Current Mode: <span id="currentMode">Alert on unload</span>
+      </div>
+    </div>
+    
+    <!-- Alert on Unload Test Section -->
+    <div class="test-section">
+      <h2>🚨 Submit with Unload Test</h2>
+      <div class="instructions">
+        <h3>Testing Background Alert/Window Opening:</h3>
+        <ol>
+          <li>Select your preferred unload mode above</li>
+          <li>Click the "Delayed Submit (5s)" button</li>
+          <li>Quickly switch IE to background (Alt+Tab or minimize window)</li>
+          <li>Wait for the automatic window close to trigger the unload event</li>
+          <li>Observe the behavior based on selected mode</li>
+        </ol>
+      </div>
+      
+      <div class="button-group">
+        <button class="btn-primary" onclick="save()">Submit (Immediate)</button>
+        <button id="delayedBtn" class="btn-delayed" onclick="delayedSave()">Delayed Submit (5s)</button>
+        <button class="btn-cancel" onclick="cancelDelayed()">Cancel Delayed</button>
+      </div>
+      
+      <div id="countdown" class="countdown hidden"></div>
+    </div>
+    
+    <!-- Window Open on Unload Test Section -->
+    <div class="test-section">
+      <h2>🌐 Navigate with Unload Test</h2>
+      <div class="instructions">
+        <h3>Testing Navigation-Triggered Unload:</h3>
+        <ol>
+          <li>Select your preferred unload mode above</li>
+          <li>Click "Delayed Navigate (5s)" to start countdown</li>
+          <li>Quickly switch IE to background if needed</li>
+          <li>Page will navigate away automatically, triggering unload event</li>
+          <li>Observe the behavior based on selected mode</li>
+        </ol>
+      </div>
+      
+      <div class="button-group">
+        <button class="btn-primary" onclick="window.location.href='index.html'">Navigate Away (Immediate)</button>
+        <button id="windowOpenBtn" class="btn-window" onclick="delayedWindowOpen()">Delayed Navigate (5s)</button>
+        <button class="btn-cancel" onclick="cancelWindowOpen()">Cancel Navigate</button>
+      </div>
+      
+      <div id="windowCountdown" class="window-countdown hidden"></div>
+    </div>
+    
+    <!-- Auto Close Test Section -->
+    <div class="test-section">
+      <h2>⏰ Auto Close Test</h2>
+      <div class="instructions">
+        <h3>Simple Automatic Window Close (No Unload Event):</h3>
+        <ol>
+          <li>Click "Start Auto Close (5s)" to begin automatic closure countdown</li>
+          <li>The window will close automatically after 5 seconds</li>
+          <li>This tests simple auto-close functionality without triggering unload events</li>
+          <li>You can cancel the operation before it completes</li>
+        </ol>
+      </div>
+      
+      <div class="button-group">
+        <button id="autoCloseBtn" class="btn-auto" onclick="startAutoClose()">Start Auto Close (5s)</button>
+        <button class="btn-cancel" onclick="cancelAutoClose()">Cancel Auto Close</button>
+      </div>
+      
+      <div id="autoCountdown" class="auto-countdown hidden"></div>
+    </div>
+    
+    <div class="instructions">
+      <h3>📋 What This Comprehensive Page Tests:</h3>
+      <ul>
+        <li><strong>Alert Mode:</strong> Shows alert dialog when page unloads</li>
+        <li><strong>Open Bing Mode:</strong> Opens Bing.com in new window when page unloads</li>
+        <li><strong>Both Mode:</strong> Shows alert AND opens Bing.com when page unloads</li>
+        <li><strong>Submit Tests:</strong> Test unload events when window closes</li>
+        <li><strong>Navigate Tests:</strong> Test unload events when navigating away</li>
+        <li><strong>Auto Close:</strong> Test simple window closure without unload events</li>
+        <li><strong>Background Testing:</strong> All delayed operations allow testing with IE in background</li>
+        <li><strong>Cancellation:</strong> All operations can be cancelled before completion</li>
+      </ul>
+    </div>
+  </div>
+</body>
+</html>
