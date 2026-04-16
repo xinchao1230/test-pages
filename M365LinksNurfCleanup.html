@@ -1,0 +1,1270 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>M365 Links NurF Cleanup Plan</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f2f5;
+            color: #1a1a2e;
+            line-height: 1.6;
+        }
+        .hero {
+            background: linear-gradient(135deg, #0078d4 0%, #005a9e 100%);
+            color: white;
+            padding: 48px 40px 36px;
+        }
+        .hero h1 { font-size: 32px; font-weight: 600; }
+        .hero p { font-size: 16px; opacity: 0.9; margin-top: 8px; }
+        .stats-bar {
+            display: flex;
+            gap: 32px;
+            margin-top: 24px;
+            flex-wrap: wrap;
+        }
+        .stat-card {
+            background: rgba(255,255,255,0.15);
+            border-radius: 12px;
+            padding: 16px 24px;
+            min-width: 160px;
+        }
+        .stat-card .num { font-size: 36px; font-weight: 700; }
+        .stat-card .label { font-size: 13px; opacity: 0.85; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 32px 40px; }
+
+        /* Tabs */
+        .tab-bar {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 24px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            color: #666;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+            user-select: none;
+        }
+        .tab:hover { color: #0078d4; }
+        .tab.active { color: #0078d4; border-bottom-color: #0078d4; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* Category section */
+        .category {
+            background: white;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+        .category-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 24px;
+            cursor: pointer;
+            user-select: none;
+        }
+        .category-header:hover { background: #fafafa; }
+        .category-title {
+            font-size: 18px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .badge-keep { background: #e6f4ea; color: #1e7e34; }
+        .badge-remove { background: #fce8e6; color: #c62828; }
+        .badge-simplify { background: #fff3e0; color: #e65100; }
+        .category-body { padding: 0 24px 24px; }
+
+        /* Decision box */
+        .decision-box {
+            background: #f8f9fa;
+            border-left: 4px solid #0078d4;
+            padding: 16px 20px;
+            margin-bottom: 20px;
+            border-radius: 0 8px 8px 0;
+            font-size: 14px;
+        }
+        .decision-box strong { color: #0078d4; }
+
+        /* Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        th {
+            background: #f5f7fa;
+            padding: 10px 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #555;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid #e0e0e0;
+            white-space: nowrap;
+        }
+        td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #f0f0f0;
+            vertical-align: middle;
+        }
+        tr:hover td { background: #f8fafc; }
+
+        .status-keep {
+            color: #1e7e34;
+            font-weight: 700;
+        }
+        .status-remove {
+            color: #c62828;
+            font-weight: 700;
+        }
+        .row-remove { opacity: 0.55; }
+        .row-remove td:first-child { text-decoration: line-through; }
+        .row-keep { background: #f0faf0 !important; }
+        .row-keep td { background: #f0faf0 !important; }
+
+        /* Bars */
+        .bar-cell { min-width: 200px; }
+        .bar-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .bar {
+            height: 20px;
+            border-radius: 4px;
+            min-width: 2px;
+            transition: width 0.4s ease;
+        }
+        .bar-shown { background: #0078d4; }
+        .bar-accept { background: #1e7e34; }
+        .bar-dismiss { background: #e65100; }
+        .bar-error { background: #c62828; }
+        .bar-label { font-size: 12px; color: #666; white-space: nowrap; }
+
+        /* Flow diagrams */
+        .flow-section {
+            margin-top: 20px;
+        }
+        .flow-box {
+            display: flex;
+            align-items: center;
+            gap: 0;
+            flex-wrap: wrap;
+            margin: 16px 0;
+        }
+        .flow-step {
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            text-align: center;
+            min-width: 160px;
+            position: relative;
+        }
+        .flow-step.banner { background: #e3f2fd; color: #1565c0; border: 2px solid #90caf9; }
+        .flow-step.flyout { background: #fce4ec; color: #c62828; border: 2px solid #ef9a9a; }
+        .flow-step.cap { background: #e8eaf6; color: #283593; border: 2px solid #9fa8da; }
+        .flow-step.removed { background: #f5f5f5; color: #999; border: 2px dashed #ccc; text-decoration: line-through; }
+        .flow-arrow {
+            font-size: 24px;
+            color: #999;
+            padding: 0 8px;
+        }
+        .flow-label {
+            display: block;
+            font-size: 11px;
+            font-weight: 400;
+            margin-top: 4px;
+        }
+        .flow-compare {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+        .flow-column h4 {
+            font-size: 14px;
+            margin-bottom: 12px;
+            padding: 8px 12px;
+            border-radius: 6px;
+        }
+        .flow-column.before h4 { background: #fce8e6; color: #c62828; }
+        .flow-column.after h4 { background: #e6f4ea; color: #1e7e34; }
+
+        /* Impact */
+        .impact-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+            margin-top: 16px;
+        }
+        .impact-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+        }
+        .impact-card h4 { font-size: 14px; color: #555; margin-bottom: 8px; }
+        .impact-card .value { font-size: 28px; font-weight: 700; }
+        .impact-card .detail { font-size: 12px; color: #888; margin-top: 4px; }
+        .green { color: #1e7e34; }
+        .red { color: #c62828; }
+        .blue { color: #0078d4; }
+
+        /* Tooltip */
+        .reason-icon {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            background: #eee;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 18px;
+            font-size: 11px;
+            cursor: help;
+            color: #666;
+            position: relative;
+        }
+        .reason-icon:hover::after {
+            content: attr(data-reason);
+            position: absolute;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            white-space: nowrap;
+            z-index: 100;
+            font-weight: 400;
+        }
+        .source-tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .source-outlook { background: #e3f2fd; color: #1565c0; }
+        .source-teams { background: #e8eaf6; color: #5c6bc0; }
+        .source-both { background: #f3e5f5; color: #7b1fa2; }
+
+        /* Preview styles */
+        .preview-section {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+            margin-bottom: 24px;
+        }
+        .keep-section {
+            border-left: 4px solid #1e7e34;
+        }
+        .remove-section {
+            border-left: 4px solid #c62828;
+        }
+        .preview-subsection {
+            margin-bottom: 24px;
+            padding: 16px;
+            background: #fafafa;
+            border-radius: 8px;
+        }
+        .preview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 16px;
+            margin-top: 12px;
+        }
+        .preview-item {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
+        }
+        .preview-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        }
+        .preview-item.keep {
+            border: 2px solid #1e7e34;
+        }
+        .preview-item.remove {
+            border: 2px solid #c62828;
+            opacity: 0.8;
+        }
+        .preview-header {
+            padding: 12px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #eee;
+        }
+        .preview-name {
+            font-weight: 600;
+            font-size: 12px;
+            color: #2980b9;
+            word-break: break-all;
+            margin-bottom: 4px;
+        }
+        .preview-type {
+            font-size: 10px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .preview-image {
+            height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f8f9fa;
+            position: relative;
+        }
+        .preview-screenshot {
+            max-width: 100%;
+            max-height: 100%;
+            border: none;
+            cursor: pointer;
+        }
+        .preview-placeholder {
+            color: #999;
+            font-style: italic;
+            font-size: 11px;
+            text-align: center;
+            padding: 20px;
+        }
+        .preview-status {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .preview-status.keep {
+            background: #e6f4ea;
+            color: #1e7e34;
+        }
+        .preview-status.remove {
+            background: #fce8e6;
+            color: #c62828;
+        }
+
+        @media (max-width: 900px) {
+            .hero { padding: 24px 16px; }
+            .container { padding: 16px; }
+            .flow-compare { grid-template-columns: 1fr; }
+            .stats-bar { gap: 12px; }
+            .stat-card { min-width: 120px; padding: 12px 16px; }
+            .stat-card .num { font-size: 24px; }
+            .preview-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="hero">
+    <h1>M365 Links NurF Cleanup Plan</h1>
+    <p>Based on current codebase: Consolidate 25 notification variants down to 5 — remove Upsell entirely, replace all Flyouts with Banners</p>
+    <div class="stats-bar">
+        <div class="stat-card">
+            <div class="num">25</div>
+            <div class="label">Current Variants</div>
+        </div>
+        <div class="stat-card">
+            <div class="num">5</div>
+            <div class="label">After Cleanup</div>
+        </div>
+        <div class="stat-card">
+            <div class="num">20</div>
+            <div class="label">To Remove</div>
+        </div>
+        <div class="stat-card">
+            <div class="num">80%</div>
+            <div class="label">Reduction</div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+
+<div class="tab-bar">
+    <div class="tab active" data-tab="comparison">Before / After Comparison</div>
+    <div class="tab" data-tab="details">Detailed Variant List</div>
+    <div class="tab" data-tab="flow">Flow Diagram</div>
+    <div class="tab" data-tab="impact">Impact Analysis</div>
+    <div class="tab" data-tab="preview">UI Preview</div>
+</div>
+
+<!-- TAB 1: Comparison -->
+<div id="comparison" class="tab-content active">
+
+<div class="category">
+    <div class="category-header" onclick="toggleCategory(this)">
+        <div class="category-title">
+            1. Upsell (Inform) — Edge Default Browser Users
+            <span class="badge badge-remove">REMOVE ALL</span>
+            <span class="badge" style="background:#fff3e0;color:#e65100">SOME ALREADY REMOVED</span>
+        </div>
+        <span class="arrow">▼</span>
+    </div>
+    <div class="category-body">
+        <div class="decision-box" style="border-left-color:#e65100">
+            <strong>Status:</strong> <span style="color:#e65100;font-weight:700">All variants exist in current codebase.</span> Current codebase contains 10 Inform variants (4 Banner + 4 Flyout + 2 Teams variants). All should be removed as Edge-DB users don't need upsell prompts.
+        </div>
+        <table>
+            <tr>
+                <th>Variant</th>
+                <th>Source</th>
+                <th>Type</th>
+                <th>Status in Code</th>
+                <th>Action</th>
+                <th>Reason</th>
+            </tr>
+            <tr class="row-remove">
+                <td>InformBannerVariant1-4</td>
+                <td><span class="source-tag source-outlook">Outlook</span></td>
+                <td>Banner</td>
+                <td>✓ Exists in code</td>
+                <td class="status-remove">✕ Remove</td>
+                <td><span class="reason-icon" data-reason="DB users don't need upsell; per Jenny's P0 plan">?</span></td>
+            </tr>
+            <tr class="row-remove">
+                <td>InformPromptVariant1-4</td>
+                <td><span class="source-tag source-outlook">Outlook</span></td>
+                <td>Flyout</td>
+                <td>✓ Exists in code</td>
+                <td class="status-remove">✕ Remove</td>
+                <td><span class="reason-icon" data-reason="Flyout deprecated; intrusive format">?</span></td>
+            </tr>
+            <tr class="row-remove">
+                <td>TeamsInformBanner</td>
+                <td><span class="source-tag source-teams">Teams</span></td>
+                <td>Banner</td>
+                <td>✓ Exists in code</td>
+                <td class="status-remove">✕ Remove</td>
+                <td><span class="reason-icon" data-reason="DB users don't need upsell; per optimization plan">?</span></td>
+            </tr>
+            <tr class="row-remove">
+                <td>TeamsInformPrompt</td>
+                <td><span class="source-tag source-teams">Teams</span></td>
+                <td>Flyout</td>
+                <td>✓ Exists in code</td>
+                <td class="status-remove">✕ Remove</td>
+                <td><span class="reason-icon" data-reason="Flyout deprecated; intrusive format">?</span></td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<div class="category">
+    <div class="category-header" onclick="toggleCategory(this)">
+        <div class="category-title">
+            2. OptOut Banner — Non-Default-Browser Users (1st prompt)
+            <span class="badge badge-simplify">SIMPLIFY</span>
+        </div>
+        <span class="arrow">▼</span>
+    </div>
+    <div class="category-body">
+        <div class="decision-box">
+            <strong>Decision:</strong> Keep only <strong>Variant1</strong> for each source. Banners used for ALL 4 impressions (replacing flyouts). Current code has 6 OptOut Banner variants total.
+        </div>
+        <table>
+            <tr>
+                <th>Variant</th>
+                <th>Source</th>
+                <th>Status in Code</th>
+                <th>Action</th>
+                <th>Reason</th>
+            </tr>
+            <tr class="row-keep">
+                <td><strong>TeamsOptOutBannerVariant1</strong></td>
+                <td><span class="source-tag source-teams">Teams</span></td>
+                <td>✓ Exists in code</td>
+                <td class="status-keep">✓ KEEP</td>
+                <td><span class="reason-icon" data-reason="Primary Teams banner; lowest dismiss rate; used by reprompt flow">?</span></td>
+            </tr>
+            <tr class="row-remove">
+                <td>TeamsOptOutBannerVariant2</td>
+                <td><span class="source-tag source-teams">Teams</span></td>
+                <td>✓ Exists in code</td>
+                <td class="status-remove">✕ Remove</td>
+                <td><span class="reason-icon" data-reason="Redundant; V1 is sufficient">?</span></td>
+            </tr>
+            <tr class="row-keep">
+                <td><strong>OptOutBannerVariant1</strong></td>
+                <td><span class="source-tag source-outlook">Outlook</span></td>
+                <td>✓ Exists in code</td>
+                <td class="status-keep">✓ KEEP</td>
+                <td><span class="reason-icon" data-reason="Primary Outlook banner; used by reprompt flow">?</span></td>
+            </tr>
+            <tr class="row-remove">
+                <td>OptOutBannerVariant2</td>
+                <td><span class="source-tag source-outlook">Outlook</span></td>
+                <td>✓ Exists in code</td>
+                <td class="status-remove">✕ Remove</td>
+                <td><span class="reason-icon" data-reason="A/B testing complete; V1 sufficient">?</span></td>
+            </tr>
+            <tr class="row-remove">
+                <td>OptOutBannerVariant3</td>
+                <td><span class="source-tag source-outlook">Outlook</span></td>
+                <td>✓ Exists in code</td>
+                <td class="status-remove">✕ Remove</td>
+                <td><span class="reason-icon" data-reason="A/B testing complete; V1 sufficient">?</span></td>
+            </tr>
+            <tr class="row-remove">
+                <td>OptOutBannerVariant4</td>
+                <td><span class="source-tag source-outlook">Outlook</span></td>
+                <td>✓ Exists in code</td>
+                <td class="status-remove">✕ Remove</td>
+                <td><span class="reason-icon" data-reason="BingAI treatment specific; not needed">?</span></td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<div class="category">
+    <div class="category-header" onclick="toggleCategory(this)">
+        <div class="category-title">
+            3. OptOut Flyout/Prompt — Non-DB Users (2nd-4th prompt)
+            <span class="badge badge-remove">REMOVE ALL</span>
+        </div>
+        <span class="arrow">▼</span>
+    </div>
+    <div class="category-body">
+        <div class="decision-box">
+            <strong>Decision:</strong> Remove ALL flyout/prompt variants. Current flow: 1st=Banner, 2nd-4th=Flyout. New plan: ALL 4 impressions use Banner V1 only. Flyouts are intrusive & verbose.
+        </div>
+        <table>
+            <tr>
+                <th>Variant</th>
+                <th>Source</th>
+                <th>Status in Code</th>
+                <th>Action</th>
+                <th>Reason</th>
+            </tr>
+            <tr class="row-remove">
+                <td>OptOutVariant1</td>
+                <td><span class="source-tag source-outlook">Outlook</span></td>
+                <td>✓ Exists in code</td>
+                <td class="status-remove">✕ Remove</td>
+                <td><span class="reason-icon" data-reason="Flyout type deprecated; replace with banner">?</span></td>
+            </tr>
+            <tr class="row-remove">
+                <td>OptOutVariant2</td>
+                <td><span class="source-tag source-outlook">Outlook</span></td>
+                <td>✓ Exists in code</td>
+                <td class="status-remove">✕ Remove</td>
+                <td><span class="reason-icon" data-reason="Flyout type deprecated">?</span></td>
+            </tr>
+            <tr class="row-remove">
+                <td>OptOutVariant3</td>
+                <td><span class="source-tag source-outlook">Outlook</span></td>
+                <td>✓ Exists in code</td>
+                <td class="status-remove">✕ Remove</td>
+                <td><span class="reason-icon" data-reason="Flyout type deprecated">?</span></td>
+            </tr>
+            <tr class="row-remove">
+                <td>OptOutVariant4</td>
+                <td><span class="source-tag source-outlook">Outlook</span></td>
+                <td>✓ Exists in code</td>
+                <td class="status-remove">✕ Remove</td>
+                <td><span class="reason-icon" data-reason="BingAI treatment only; flyout deprecated">?</span></td>
+            </tr>
+            <tr class="row-remove">
+                <td>OptOutLastFlyOutBingVariant</td>
+                <td><span class="source-tag source-outlook">Outlook</span></td>
+                <td>✓ Exists in code</td>
+                <td class="status-remove">✕ Remove</td>
+                <td><span class="reason-icon" data-reason="Last-resort BingAI flyout; deprecated">?</span></td>
+            </tr>
+            <tr class="row-remove">
+                <td>TeamsOptOutVariant1</td>
+                <td><span class="source-tag source-teams">Teams</span></td>
+                <td>✓ Exists in code</td>
+                <td class="status-remove">✕ Remove</td>
+                <td><span class="reason-icon" data-reason="Flyout type deprecated; replace with banner">?</span></td>
+            </tr>
+            <tr class="row-remove">
+                <td>TeamsOptOutVariant2</td>
+                <td><span class="source-tag source-teams">Teams</span></td>
+                <td>✓ Exists in code</td>
+                <td class="status-remove">✕ Remove</td>
+                <td><span class="reason-icon" data-reason="Flyout type deprecated">?</span></td>
+            </tr>
+            <tr class="row-remove">
+                <td>TeamsOptOutVariant3</td>
+                <td><span class="source-tag source-teams">Teams</span></td>
+                <td>✓ Exists in code</td>
+                <td class="status-remove">✕ Remove</td>
+                <td><span class="reason-icon" data-reason="Flyout type deprecated">?</span></td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<div class="category">
+    <div class="category-header" onclick="toggleCategory(this)">
+        <div class="category-title">
+            4. OptOut Sidebar
+            <span class="badge badge-remove">REMOVE ALL</span>
+        </div>
+        <span class="arrow">▼</span>
+    </div>
+    <div class="category-body">
+        <div class="decision-box">
+            <strong>Decision:</strong> Remove all 4 sidebar variants. Current code has all 4 variants present. These were specific to Outlook treatment experiments. Replaced by banner-only approach.
+        </div>
+        <table>
+            <tr><th>Variant</th><th>Source</th><th>Status in Code</th><th>Action</th><th>Reason</th></tr>
+            <tr class="row-remove">
+                <td>OptOutSidebarAlwaysShow</td>
+                <td><span class="source-tag source-outlook">Outlook</span></td>
+                <td>✓ Exists in code</td>
+                <td class="status-remove">✕ Remove</td>
+                <td><span class="reason-icon" data-reason="Treatment-specific; sidebar approach deprecated">?</span></td>
+            </tr>
+            <tr class="row-remove">
+                <td>OptOutSidebarAutoHide</td>
+                <td><span class="source-tag source-outlook">Outlook</span></td>
+                <td>✓ Exists in code</td>
+                <td class="status-remove">✕ Remove</td>
+                <td><span class="reason-icon" data-reason="Treatment-specific; sidebar approach deprecated">?</span></td>
+            </tr>
+            <tr class="row-remove">
+                <td>OptOutSidebarAlwaysShowLast</td>
+                <td><span class="source-tag source-outlook">Outlook</span></td>
+                <td>✓ Exists in code</td>
+                <td class="status-remove">✕ Remove</td>
+                <td><span class="reason-icon" data-reason="Last-resort sidebar; deprecated">?</span></td>
+            </tr>
+            <tr class="row-remove">
+                <td>OptOutSidebarAutoHideLast</td>
+                <td><span class="source-tag source-outlook">Outlook</span></td>
+                <td>✓ Exists in code</td>
+                <td class="status-remove">✕ Remove</td>
+                <td><span class="reason-icon" data-reason="Last-resort sidebar; deprecated">?</span></td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<div class="category">
+    <div class="category-header" onclick="toggleCategory(this)">
+        <div class="category-title">
+            5. OptOut Modal
+            <span class="badge badge-remove">REMOVE ALL</span>
+            <span class="badge" style="background:#e8eaf6;color:#283593">SOME STILL IN CODE</span>
+        </div>
+        <span class="arrow">▼</span>
+    </div>
+    <div class="category-body">
+        <div class="decision-box" style="border-left-color:#e65100">
+            <strong>Status:</strong> <span style="color:#e65100;font-weight:700">Mixed status - variants exist in code but may be disabled by feature flag.</span> Current code has 3 Modal variants. The feature flag <code>kM365LinksSkipBlockingDialog</code> may prevent Modal triggers, but the variants and metadata remain in code and need cleanup.
+        </div>
+        <table>
+            <tr><th>Variant</th><th>Source</th><th>Status in Code</th><th>Action</th><th>Reason</th></tr>
+            <tr class="row-remove">
+                <td>OptOutModalVariant1</td>
+                <td><span class="source-tag source-outlook">Outlook</span></td>
+                <td>✓ Exists in code</td>
+                <td class="status-remove">✕ Remove</td>
+                <td><span class="reason-icon" data-reason="Most intrusive format; banner-only plan">?</span></td>
+            </tr>
+            <tr class="row-remove">
+                <td>OptOutModalVariant2</td>
+                <td><span class="source-tag source-outlook">Outlook</span></td>
+                <td>✓ Exists in code</td>
+                <td class="status-remove">✕ Remove</td>
+                <td><span class="reason-icon" data-reason="Most intrusive format; banner-only plan">?</span></td>
+            </tr>
+            <tr class="row-remove">
+                <td>OptOutModalVariant4</td>
+                <td><span class="source-tag source-outlook">Outlook</span></td>
+                <td>✓ Exists in code</td>
+                <td class="status-remove">✕ Remove</td>
+                <td><span class="reason-icon" data-reason="Most intrusive format; banner-only plan">?</span></td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<div class="category">
+    <div class="category-header" onclick="toggleCategory(this)">
+        <div class="category-title">
+            6. Managed Banner — Enterprise Policy Users
+            <span class="badge badge-keep">KEEP</span>
+        </div>
+        <span class="arrow">▼</span>
+    </div>
+    <div class="category-body">
+        <div class="decision-box">
+            <strong>Decision:</strong> Keep both (one per source). Simplify copy — per Lindsay's feedback the banner is not actionable for users, consider moving info to settings page.
+        </div>
+        <table>
+            <tr><th>Variant</th><th>Source</th><th>Shown</th><th>Accept Rate</th><th>Action</th><th>Reason</th></tr>
+            <tr class="row-keep">
+                <td><strong>ManagedBanner</strong></td>
+                <td><span class="source-tag source-outlook">Outlook</span></td>
+                <td><div class="bar-container"><div class="bar bar-shown" style="width:4px"></div><span class="bar-label">727</span></div></td>
+                <td>2.5%</td>
+                <td class="status-keep">✓ KEEP</td>
+                <td><span class="reason-icon" data-reason="Required for enterprise devices; one per source">?</span></td>
+            </tr>
+            <tr class="row-keep">
+                <td><strong>TeamsManagedBanner</strong></td>
+                <td><span class="source-tag source-teams">Teams</span></td>
+                <td><div class="bar-container"><div class="bar bar-shown" style="width:2px"></div><span class="bar-label">340</span></div></td>
+                <td>2.1%</td>
+                <td class="status-keep">✓ KEEP</td>
+                <td><span class="reason-icon" data-reason="Required for enterprise devices; one per source">?</span></td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<div class="category">
+    <div class="category-header" onclick="toggleCategory(this)">
+        <div class="category-title">
+            7. Settings FN — Adjust Setting View
+            <span class="badge badge-keep">KEEP</span>
+        </div>
+        <span class="arrow">▼</span>
+    </div>
+    <div class="category-body">
+        <div class="decision-box">
+            <strong>Decision:</strong> Keep. This is the only entry point for users to adjust their M365 Links setting after the initial prompts.
+        </div>
+        <table>
+            <tr><th>Variant</th><th>Accepted</th><th>Action</th><th>Reason</th></tr>
+            <tr class="row-keep">
+                <td><strong>OptOutAdjustSettingView</strong></td>
+                <td><div class="bar-container"><div class="bar bar-accept" style="width:120px"></div><span class="bar-label">41,455</span></div></td>
+                <td class="status-keep">✓ KEEP</td>
+                <td><span class="reason-icon" data-reason="Only setting adjustment entry point; high engagement">?</span></td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+</div><!-- end comparison tab -->
+
+<!-- TAB 2: Details -->
+<div id="details" class="tab-content">
+<div class="category">
+    <div class="category-header">
+        <div class="category-title">Complete Variant List with Metrics</div>
+    </div>
+    <div class="category-body">
+    <table>
+        <tr>
+            <th>Variant Name</th>
+            <th>Campaign ID</th>
+            <th>Source</th>
+            <th>Type</th>
+            <th>Triggered</th>
+            <th>Shown</th>
+            <th>Accept</th>
+            <th>Dismiss</th>
+            <th>Error</th>
+            <th>Action</th>
+        </tr>
+        <tr class="row-remove"><td>InformBannerVariant1</td><td>M365OpenLinks_InformBannerVariant1</td><td><span class="source-tag source-outlook">OL</span></td><td>Banner</td><td>1,358,758</td><td>10,719</td><td>2,072</td><td>1,411</td><td>108</td><td class="status-remove">✕</td></tr>
+        <tr class="row-remove"><td>InformBannerVariant2-4</td><td>M365OpenLinks_InformBannerVariant2-4</td><td><span class="source-tag source-outlook">OL</span></td><td>Banner</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td class="status-remove">✕</td></tr>
+        <tr class="row-remove"><td>InformPromptVariant1-4</td><td>M365OpenLinks_InformVariant1-4</td><td><span class="source-tag source-outlook">OL</span></td><td>Flyout</td><td>2,324</td><td>1,801</td><td>871</td><td>855</td><td>62</td><td class="status-remove">✕</td></tr>
+        <tr class="row-remove"><td>TeamsInformBanner</td><td>M365OpenLinks_TeamsInformBanner</td><td><span class="source-tag source-teams">TM</span></td><td>Banner</td><td>1,126,772</td><td>19,922</td><td>4,069</td><td>2,903</td><td>215</td><td class="status-remove">✕</td></tr>
+        <tr class="row-remove"><td>TeamsInformPrompt</td><td>M365OpenLinks_TeamsInformPrompt</td><td><span class="source-tag source-teams">TM</span></td><td>Flyout</td><td>3,253</td><td>2,548</td><td>1,150</td><td>1,272</td><td>37</td><td class="status-remove">✕</td></tr>
+        <tr style="background:#f5f7fa"><td colspan="10" style="font-weight:600;color:#555;padding:12px">OptOut Banner</td></tr>
+        <tr class="row-keep"><td><strong>TeamsOptOutBannerV1</strong></td><td>M365OpenLinks_TeamsOptOutBannerVariant1</td><td><span class="source-tag source-teams">TM</span></td><td>Banner</td><td>184,905</td><td>160,402</td><td>13,989</td><td>6,362</td><td>5,609</td><td class="status-keep">✓</td></tr>
+        <tr class="row-remove"><td>TeamsOptOutBannerV2</td><td>M365OpenLinks_TeamsOptOutBannerVariant2</td><td><span class="source-tag source-teams">TM</span></td><td>Banner</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td class="status-remove">✕</td></tr>
+        <tr class="row-keep"><td><strong>OptOutBannerV1</strong></td><td>M365OpenLinks_OptOutBannerVariant1</td><td><span class="source-tag source-outlook">OL</span></td><td>Banner</td><td>56,248</td><td>54,319</td><td>5,359</td><td>3,854</td><td>807</td><td class="status-keep">✓</td></tr>
+        <tr class="row-remove"><td>OptOutBannerV2-3</td><td>M365OpenLinks_OptOutBannerVariant2-3</td><td><span class="source-tag source-outlook">OL</span></td><td>Banner</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td class="status-remove">✕</td></tr>
+        <tr class="row-remove"><td>OptOutBannerV4</td><td>M365OpenLinks_OptOutBannerVariant4</td><td><span class="source-tag source-outlook">OL</span></td><td>Banner</td><td>19,239</td><td>18,493</td><td>1,126</td><td>1,023</td><td>330</td><td class="status-remove">✕</td></tr>
+        <tr style="background:#f5f7fa"><td colspan="10" style="font-weight:600;color:#555;padding:12px">OptOut Flyout (ALL REMOVED)</td></tr>
+        <tr class="row-remove"><td>TeamsOptOutPromptV1</td><td>M365OpenLinks_TeamsOptOutVariant1</td><td><span class="source-tag source-teams">TM</span></td><td>Flyout</td><td>203,507</td><td>130,700</td><td>45,580</td><td>22,668</td><td>59,046</td><td class="status-remove">✕</td></tr>
+        <tr class="row-remove"><td>TeamsOptOutPromptV3</td><td>M365OpenLinks_TeamsOptOutVariant3</td><td><span class="source-tag source-teams">TM</span></td><td>Flyout</td><td>47,188</td><td>28,377</td><td>8,732</td><td>5,329</td><td>17,087</td><td class="status-remove">✕</td></tr>
+        <tr class="row-remove"><td>OptOutPromptV1</td><td>M365OpenLinks_OptOutVariant1</td><td><span class="source-tag source-outlook">OL</span></td><td>Flyout</td><td>65,771</td><td>50,531</td><td>17,724</td><td>13,036</td><td>14,119</td><td class="status-remove">✕</td></tr>
+        <tr class="row-remove"><td>OptOutPromptV3</td><td>M365OpenLinks_OptOutVariant3</td><td><span class="source-tag source-outlook">OL</span></td><td>Flyout</td><td>12,981</td><td>9,527</td><td>2,794</td><td>2,848</td><td>3,377</td><td class="status-remove">✕</td></tr>
+        <tr class="row-remove"><td>OptOutPromptV4</td><td>M365OpenLinks_OptOutVariant4</td><td><span class="source-tag source-outlook">OL</span></td><td>Flyout</td><td>24,180</td><td>19,870</td><td>5,900</td><td>4,675</td><td>3,544</td><td class="status-remove">✕</td></tr>
+        <tr class="row-remove"><td>OptOutLastFlyOutBing</td><td>M365OpenLinks_OptOutLastFlyOutBingVariant</td><td><span class="source-tag source-outlook">OL</span></td><td>Flyout</td><td>5,046</td><td>4,119</td><td>948</td><td>1,012</td><td>891</td><td class="status-remove">✕</td></tr>
+        <tr style="background:#f5f7fa"><td colspan="10" style="font-weight:600;color:#555;padding:12px">Managed / Settings</td></tr>
+        <tr class="row-keep"><td><strong>ManagedBanner</strong></td><td>M365OpenLinks_ManagedBanner</td><td><span class="source-tag source-outlook">OL</span></td><td>Banner</td><td>6,206</td><td>727</td><td>18</td><td>185</td><td>7</td><td class="status-keep">✓</td></tr>
+        <tr class="row-keep"><td><strong>TeamsManagedBanner</strong></td><td>M365OpenLinks_TeamsManagedBanner</td><td><span class="source-tag source-teams">TM</span></td><td>Banner</td><td>552</td><td>340</td><td>7</td><td>89</td><td>0</td><td class="status-keep">✓</td></tr>
+        <tr class="row-keep"><td><strong>AdjustSettingView</strong></td><td>M365OpenLinks_OptOutAdjustSettingView</td><td><span class="source-tag source-both">FN</span></td><td>FN</td><td>61,948</td><td>—</td><td>41,455</td><td>20,285</td><td>—</td><td class="status-keep">✓</td></tr>
+    </table>
+    </div>
+</div>
+</div>
+
+<!-- TAB 3: Flow -->
+<div id="flow" class="tab-content">
+<div class="category">
+    <div class="category-header">
+        <div class="category-title">OptOut Flow: Before vs After</div>
+    </div>
+    <div class="category-body">
+        <div class="flow-compare">
+            <div class="flow-column before">
+                <h4>❌ Before (Complex, mixed formats)</h4>
+                <div class="flow-box">
+                    <div class="flow-step banner">1st: Banner<span class="flow-label">Random V1-V4</span></div>
+                    <span class="flow-arrow">→</span>
+                    <div class="flow-step flyout">2nd: Flyout<span class="flow-label">Random V1-V4</span></div>
+                    <span class="flow-arrow">→</span>
+                    <div class="flow-step flyout">3rd: Flyout<span class="flow-label">Random V1-V4</span></div>
+                    <span class="flow-arrow">→</span>
+                    <div class="flow-step flyout">4th: Flyout<span class="flow-label">Variant3</span></div>
+                    <span class="flow-arrow">→</span>
+                    <div class="flow-step cap">Cap Reached<span class="flow-label">Auto-select Edge</span></div>
+                </div>
+                <p style="font-size:13px;color:#666;margin-top:8px">+ Reprompt flow (fixed V1) + BingAI treatment + Sidebar treatment (4 variants) + Modal fallback (3 variants) = <strong>25 variants in current code</strong></p>
+            </div>
+            <div class="flow-column after">
+                <h4>✅ After (Simple, banner only)</h4>
+                <div class="flow-box">
+                    <div class="flow-step banner">1st: Banner V1<span class="flow-label">Fixed</span></div>
+                    <span class="flow-arrow">→</span>
+                    <div class="flow-step banner">2nd: Banner V1<span class="flow-label">Fixed</span></div>
+                    <span class="flow-arrow">→</span>
+                    <div class="flow-step banner">3rd: Banner V1<span class="flow-label">Fixed</span></div>
+                    <span class="flow-arrow">→</span>
+                    <div class="flow-step banner">4th: Banner V1<span class="flow-label">Fixed</span></div>
+                    <span class="flow-arrow">→</span>
+                    <div class="flow-step cap">Cap Reached<span class="flow-label">Auto-select Edge</span></div>
+                </div>
+                <p style="font-size:13px;color:#666;margin-top:8px">1 variant per source × 2 sources = <strong>2 paths total</strong></p>
+            </div>
+        </div>
+
+        <h4 style="margin-top:32px;margin-bottom:16px">Managed Flow (unchanged)</h4>
+        <div class="flow-box">
+            <div class="flow-step banner">Policy Enabled?<span class="flow-label">Check</span></div>
+            <span class="flow-arrow">→</span>
+            <div class="flow-step banner">ManagedBanner<span class="flow-label">1 impression</span></div>
+            <span class="flow-arrow">→</span>
+            <div class="flow-step cap">Done<span class="flow-label">Set pref</span></div>
+        </div>
+
+        <h4 style="margin-top:32px;margin-bottom:16px;text-decoration:line-through;color:#c62828">Upsell Flow (REMOVED)</h4>
+        <div class="flow-box">
+            <div class="flow-step removed">Edge is DB?<span class="flow-label">return false</span></div>
+            <span class="flow-arrow" style="color:#ccc">→</span>
+            <div class="flow-step removed">No notification<span class="flow-label">Removed</span></div>
+        </div>
+    </div>
+</div>
+</div>
+
+<!-- TAB 4: Impact -->
+<div id="impact" class="tab-content">
+<div class="impact-grid">
+    <div class="impact-card">
+        <h4>Variants Removed</h4>
+        <div class="value red">20</div>
+        <div class="detail">From 25 variants down to 5 (based on current codebase)</div>
+    </div>
+    <div class="impact-card">
+        <h4>Code Complexity Reduction</h4>
+        <div class="value green">~80%</div>
+        <div class="detail">Remove random selection, treatment branching, sidebar/modal/flyout paths</div>
+    </div>
+    <div class="impact-card">
+        <h4>Current Codebase Status</h4>
+        <div class="value blue">25</div>
+        <div class="detail">Total variants found in current campaigns_data.js (24 M365 + 1 FN)</div>
+    </div>
+    <div class="impact-card">
+        <h4>Variants to Keep</h4>
+        <div class="value green">5</div>
+        <div class="detail">2 Banner V1 + 2 Managed + 1 Settings = Core functionality only</div>
+    </div>
+    <div class="impact-card">
+        <h4>Upsell/Inform Variants</h4>
+        <div class="value red">10</div>
+        <div class="detail">All 4 Banner + 4 Flyout + 2 Teams variants to be removed</div>
+    </div>
+    <div class="impact-card">
+        <h4>Intrusive UI Types</h4>
+        <div class="value red">15</div>
+        <div class="detail">8 Flyout + 3 Modal + 4 Sidebar variants to be removed</div>
+    </div>
+</div>
+
+<div class="category" style="margin-top:24px">
+    <div class="category-header">
+        <div class="category-title">Why Remove Each Category</div>
+    </div>
+    <div class="category-body">
+        <table>
+            <tr><th>Category</th><th>Variants in Code</th><th>Reason for Removal</th></tr>
+            <tr>
+                <td><strong>Upsell/Inform (all)</strong></td>
+                <td>10 variants</td>
+                <td>Edge-DB users don't need "use Edge" prompts. Low value, causes notification fatigue. Per product requirements.</td>
+            </tr>
+            <tr>
+                <td><strong>OptOut Flyout (all)</strong></td>
+                <td>8 variants</td>
+                <td>Intrusive & verbose format. High error rates reported in telemetry. High dismiss rates. Replace with less intrusive banners.</td>
+            </tr>
+            <tr>
+                <td><strong>OptOut Sidebar (all)</strong></td>
+                <td>4 variants</td>
+                <td>Experiment-specific treatment variants. Complex sidebar state dependency. Simplified to universal banner approach.</td>
+            </tr>
+            <tr>
+                <td><strong>OptOut Modal (all)</strong></td>
+                <td>3 variants</td>
+                <td>Most intrusive format. "Last resort" no longer needed with 4x banner cap. Causes highest user dissatisfaction.</td>
+            </tr>
+            <tr>
+                <td><strong>Extra Banner Variants</strong></td>
+                <td>4 variants</td>
+                <td>A/B testing phase complete. V1 consistently best or equal performance. Simplify to single variant per source.</td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<div class="category" style="margin-top:24px">
+    <div class="category-header">
+        <div class="category-title">Why Keep Each Variant</div>
+    </div>
+    <div class="category-body">
+        <table>
+            <tr><th>Variant</th><th>Reason for Keeping</th></tr>
+            <tr><td><strong>TeamsOptOutBannerVariant1</strong></td><td>Primary Teams banner; reliable banner format; used by reprompt flow; represents Teams source in simplified flow</td></tr>
+            <tr><td><strong>OptOutBannerVariant1</strong></td><td>Primary Outlook banner; used by reprompt flow; represents Outlook source in simplified flow; consistent with Teams approach</td></tr>
+            <tr><td><strong>ManagedBanner</strong></td><td>Required for enterprise-managed devices (policy-driven); distinct Outlook source needed for compliance</td></tr>
+            <tr><td><strong>TeamsManagedBanner</strong></td><td>Required for enterprise-managed devices (policy-driven); distinct Teams source needed for compliance</td></tr>
+            <tr><td><strong>M365LinksOptOutAdjustSettingView</strong></td><td>Only entry point for users to change M365 Links setting post-prompt; critical for user control and settings management</td></tr>
+        </table>
+    </div>
+</div>
+</div>
+
+<!-- TAB 5: UI Preview -->
+<div id="preview" class="tab-content">
+
+<div class="category">
+    <div class="category-header">
+        <div class="category-title">
+            UI Variants Preview
+            <span class="badge badge-keep">Keep 5</span>
+            <span class="badge badge-remove">Remove 20</span>
+        </div>
+    </div>
+    <div class="category-body">
+        <p style="margin-bottom:24px;color:#666">Visual preview of which UI variants will be kept and which will be removed. Screenshots are loaded from the campaigns database.</p>
+
+        <!-- Keep Section -->
+        <div class="preview-section keep-section">
+            <h3 style="color:#1e7e34;margin-bottom:16px;display:flex;align-items:center;gap:8px">
+                <span class="badge badge-keep">✓ KEEP (5 variants)</span>
+            </h3>
+            <div class="preview-grid" id="keepGrid">
+                <!-- Will be populated by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Remove Section -->
+        <div class="preview-section remove-section" style="margin-top:32px">
+            <h3 style="color:#c62828;margin-bottom:16px;display:flex;align-items:center;gap:8px">
+                <span class="badge badge-remove">✕ REMOVE (20 variants)</span>
+            </h3>
+
+            <!-- Upsell/Inform -->
+            <div class="preview-subsection">
+                <h4 style="color:#c62828;margin-bottom:12px;font-size:14px">Upsell/Inform (10 variants)</h4>
+                <div class="preview-grid" id="upsellGrid">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- OptOut Flyout -->
+            <div class="preview-subsection">
+                <h4 style="color:#c62828;margin-bottom:12px;font-size:14px">OptOut Flyout (8 variants)</h4>
+                <div class="preview-grid" id="flyoutGrid">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Other Removals -->
+            <div class="preview-subsection">
+                <h4 style="color:#c62828;margin-bottom:12px;font-size:14px">Other (Modal + Sidebar + Extra Banner - 7 variants)</h4>
+                <div class="preview-grid" id="otherGrid">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</div><!-- end preview tab -->
+
+</div><!-- end container -->
+
+<script>
+// Tab switching
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            tab.classList.add('active');
+            document.getElementById(tab.dataset.tab).classList.add('active');
+
+            // Initialize preview when tab is opened
+            if (tab.dataset.tab === 'preview') {
+                initializePreview();
+            }
+        });
+    });
+});
+
+// Category toggle
+function toggleCategory(header) {
+    const body = header.nextElementSibling;
+    const arrow = header.querySelector('.arrow');
+    if (body.style.display === 'none') {
+        body.style.display = 'block';
+        arrow.textContent = '▼';
+    } else {
+        body.style.display = 'none';
+        arrow.textContent = '▶';
+    }
+}
+
+// Define variants to keep and remove based on the cleanup plan
+const variantConfig = {
+    keep: [
+        { id: 'M365OpenLinks_TeamsOptOutBannerVariant1', name: 'TeamsOptOutBannerVariant1', type: 'Banner', source: 'Teams' },
+        { id: 'M365OpenLinks_OptOutBannerVariant1', name: 'OptOutBannerVariant1', type: 'Banner', source: 'Outlook' },
+        { id: 'M365OpenLinks_ManagedBanner', name: 'ManagedBanner', type: 'Banner', source: 'Outlook' },
+        { id: 'M365OpenLinks_TeamsManagedBanner', name: 'TeamsManagedBanner', type: 'Banner', source: 'Teams' },
+        { id: 'FN_M365LinksOptOutAdjustSettingView', name: 'M365LinksOptOutAdjustSettingView', type: 'FN', source: 'Settings' }
+    ],
+    remove: {
+        upsell: [
+            { id: 'M365OpenLinks_InformBannerVariant1', name: 'InformBannerVariant1', type: 'Banner', source: 'Outlook' },
+            { id: 'M365OpenLinks_InformBannerVariant2', name: 'InformBannerVariant2', type: 'Banner', source: 'Outlook' },
+            { id: 'M365OpenLinks_InformBannerVariant3', name: 'InformBannerVariant3', type: 'Banner', source: 'Outlook' },
+            { id: 'M365OpenLinks_InformBannerVariant4', name: 'InformBannerVariant4', type: 'Banner', source: 'Outlook' },
+            { id: 'M365OpenLinks_InformVariant1', name: 'InformPromptVariant1', type: 'Flyout', source: 'Outlook' },
+            { id: 'M365OpenLinks_InformVariant2', name: 'InformPromptVariant2', type: 'Flyout', source: 'Outlook' },
+            { id: 'M365OpenLinks_InformVariant3', name: 'InformPromptVariant3', type: 'Flyout', source: 'Outlook' },
+            { id: 'M365OpenLinks_InformVariant4', name: 'InformPromptVariant4', type: 'Flyout', source: 'Outlook' },
+            { id: 'M365OpenLinks_TeamsInformBanner', name: 'TeamsInformBanner', type: 'Banner', source: 'Teams' },
+            { id: 'M365OpenLinks_TeamsInformPrompt', name: 'TeamsInformPrompt', type: 'Flyout', source: 'Teams' }
+        ],
+        flyout: [
+            { id: 'M365OpenLinks_OptOutVariant1', name: 'OptOutPromptVariant1', type: 'Flyout', source: 'Outlook' },
+            { id: 'M365OpenLinks_OptOutVariant2', name: 'OptOutPromptVariant2', type: 'Flyout', source: 'Outlook' },
+            { id: 'M365OpenLinks_OptOutVariant3', name: 'OptOutPromptVariant3', type: 'Flyout', source: 'Outlook' },
+            { id: 'M365OpenLinks_OptOutVariant4', name: 'OptOutPromptVariant4', type: 'Flyout', source: 'Outlook' },
+            { id: 'M365OpenLinks_OptOutLastFlyOutBingVariant', name: 'OptOutLastFlyOutBingVariant', type: 'Flyout', source: 'Outlook' },
+            { id: 'M365OpenLinks_TeamsOptOutVariant1', name: 'TeamsOptOutPromptVariant1', type: 'Flyout', source: 'Teams' },
+            { id: 'M365OpenLinks_TeamsOptOutVariant2', name: 'TeamsOptOutPromptVariant2', type: 'Flyout', source: 'Teams' },
+            { id: 'M365OpenLinks_TeamsOptOutVariant3', name: 'TeamsOptOutPromptVariant3', type: 'Flyout', source: 'Teams' }
+        ],
+        other: [
+            { id: 'M365OpenLinks_OptOutBannerVariant2', name: 'OptOutBannerVariant2', type: 'Banner', source: 'Outlook' },
+            { id: 'M365OpenLinks_OptOutBannerVariant3', name: 'OptOutBannerVariant3', type: 'Banner', source: 'Outlook' },
+            { id: 'M365OpenLinks_OptOutBannerVariant4', name: 'OptOutBannerVariant4', type: 'Banner', source: 'Outlook' },
+            { id: 'M365OpenLinks_TeamsOptOutBannerVariant2', name: 'TeamsOptOutBannerVariant2', type: 'Banner', source: 'Teams' },
+            { id: 'M365OpenLinks_OptOutModalVariant1', name: 'OptOutModalVariant1', type: 'Modal', source: 'Outlook' },
+            { id: 'M365OpenLinks_OptOutModalVariant2', name: 'OptOutModalVariant2', type: 'Modal', source: 'Outlook' },
+            { id: 'M365OpenLinks_OptOutModalVariant4', name: 'OptOutModalVariant4', type: 'Modal', source: 'Outlook' }
+        ]
+    }
+};
+
+// Initialize preview functionality
+function initializePreview() {
+    populatePreviewGrid('keepGrid', variantConfig.keep, 'keep');
+    populatePreviewGrid('upsellGrid', variantConfig.remove.upsell, 'remove');
+    populatePreviewGrid('flyoutGrid', variantConfig.remove.flyout, 'remove');
+    populatePreviewGrid('otherGrid', variantConfig.remove.other, 'remove');
+}
+
+// Populate a preview grid with variants
+function populatePreviewGrid(gridId, variants, status) {
+    const grid = document.getElementById(gridId);
+    if (!grid) return;
+
+    grid.innerHTML = '';
+
+    variants.forEach(variant => {
+        const item = createPreviewItem(variant, status);
+        grid.appendChild(item);
+    });
+}
+
+// Create a preview item for a variant
+function createPreviewItem(variant, status) {
+    const item = document.createElement('div');
+    item.className = `preview-item ${status}`;
+
+    item.innerHTML = `
+        <div class="preview-header">
+            <div class="preview-name">${variant.name}</div>
+            <div class="preview-type">${variant.type} • ${variant.source}</div>
+        </div>
+        <div class="preview-image">
+            <div class="preview-placeholder">Loading screenshot...</div>
+            <div class="preview-status ${status}">${status === 'keep' ? 'KEEP' : 'REMOVE'}</div>
+        </div>
+    `;
+
+    // Load screenshot
+    loadPreviewScreenshot(variant.id, item.querySelector('.preview-image'));
+
+    return item;
+}
+
+// Load screenshot for a variant
+function loadPreviewScreenshot(campaignId, container) {
+    const img = document.createElement('img');
+    img.className = 'preview-screenshot';
+    img.alt = campaignId;
+    img.src = `screenshots/${campaignId}.png`;
+
+    img.onload = function() {
+        // Get the status badge before clearing
+        const statusBadge = container.parentElement.querySelector('.preview-status');
+        const statusClone = statusBadge ? statusBadge.cloneNode(true) : null;
+
+        // Clear container and add image
+        container.innerHTML = '';
+        container.appendChild(img);
+
+        // Re-add status badge
+        if (statusClone) {
+            container.appendChild(statusClone);
+        }
+
+        // Add click handler for modal view
+        img.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            openScreenshotModal(img.src, campaignId);
+        });
+    };
+
+    img.onerror = function() {
+        // Try to load Default.png as fallback
+        const defaultImg = document.createElement('img');
+        defaultImg.className = 'preview-screenshot';
+        defaultImg.alt = `${campaignId} (Default)`;
+        defaultImg.src = 'screenshots/Default.png';
+
+        defaultImg.onload = function() {
+            // Get the status badge before clearing
+            const statusBadge = container.parentElement.querySelector('.preview-status');
+            const statusClone = statusBadge ? statusBadge.cloneNode(true) : null;
+
+            // Clear container and add image
+            container.innerHTML = '';
+            container.appendChild(defaultImg);
+
+            // Re-add status badge
+            if (statusClone) {
+                container.appendChild(statusClone);
+            }
+
+            // Add click handler
+            defaultImg.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                openScreenshotModal(defaultImg.src, campaignId);
+            });
+        };
+
+        defaultImg.onerror = function() {
+            // If Default.png also doesn't exist, show placeholder
+            const placeholder = container.querySelector('.preview-placeholder');
+            if (placeholder) {
+                placeholder.textContent = 'Screenshot not available';
+            }
+        };
+    };
+}
+
+// Open screenshot in modal (reuse existing modal if available)
+function openScreenshotModal(imgSrc, campaignId) {
+    // Create a simple modal if one doesn't exist
+    let modal = document.getElementById('screenshotModal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'screenshotModal';
+        modal.style.cssText = `
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.9);
+        `;
+
+        modal.innerHTML = `
+            <span id="modalClose" style="position: absolute; top: 15px; right: 35px; color: #f1f1f1; font-size: 40px; font-weight: bold; cursor: pointer;">&times;</span>
+            <div style="position: absolute; top: 20px; left: 20px; color: white; background: rgba(0,0,0,0.7); padding: 10px 15px; border-radius: 4px; font-size: 16px;" id="modalHeader"></div>
+            <img style="margin: auto; display: block; max-width: 95%; max-height: 95%; margin-top: 2%;" id="modalImage">
+        `;
+
+        document.body.appendChild(modal);
+
+        // Add event listeners
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+
+        document.getElementById('modalClose').addEventListener('click', function() {
+            modal.style.display = 'none';
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && modal.style.display === 'block') {
+                modal.style.display = 'none';
+            }
+        });
+    }
+
+    // Update modal content
+    document.getElementById('modalImage').src = imgSrc;
+    document.getElementById('modalHeader').textContent = campaignId;
+
+    // Show modal
+    modal.style.display = 'block';
+}
+</script>
+</body>
+</html>
