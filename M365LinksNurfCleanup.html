@@ -389,22 +389,22 @@
 
 <div class="hero">
     <h1>M365 Links NurF Cleanup Plan</h1>
-    <p>Based on current codebase: Consolidate 25 notification variants down to 5 — remove Upsell entirely, replace all Flyouts with Banners</p>
+    <p>Based on current codebase: Consolidate 34 campaigns down to 7 — remove Upsell entirely, keep Banner+Flyout flow with one variant each per source</p>
     <div class="stats-bar">
         <div class="stat-card">
-            <div class="num">25</div>
-            <div class="label">Current Variants</div>
+            <div class="num">34</div>
+            <div class="label">Current Campaigns</div>
         </div>
         <div class="stat-card">
-            <div class="num">5</div>
+            <div class="num">7</div>
             <div class="label">After Cleanup</div>
         </div>
         <div class="stat-card">
-            <div class="num">20</div>
+            <div class="num">27</div>
             <div class="label">To Remove</div>
         </div>
         <div class="stat-card">
-            <div class="num">80%</div>
+            <div class="num">79%</div>
             <div class="label">Reduction</div>
         </div>
     </div>
@@ -446,7 +446,7 @@
                 <th>Reason</th>
             </tr>
             <tr class="row-remove">
-                <td>InformBannerVariant1-4</td>
+                <td>InformBannerVariant1</td>
                 <td><span class="source-tag source-outlook">Outlook</span></td>
                 <td>Banner</td>
                 <td>✓ Exists in code</td>
@@ -454,7 +454,55 @@
                 <td><span class="reason-icon" data-reason="DB users don't need upsell; per Jenny's P0 plan">?</span></td>
             </tr>
             <tr class="row-remove">
-                <td>InformPromptVariant1-4</td>
+                <td>InformBannerVariant2</td>
+                <td><span class="source-tag source-outlook">Outlook</span></td>
+                <td>Banner</td>
+                <td>✓ Exists in code</td>
+                <td class="status-remove">✕ Remove</td>
+                <td><span class="reason-icon" data-reason="DB users don't need upsell; per Jenny's P0 plan">?</span></td>
+            </tr>
+            <tr class="row-remove">
+                <td>InformBannerVariant3</td>
+                <td><span class="source-tag source-outlook">Outlook</span></td>
+                <td>Banner</td>
+                <td>✓ Exists in code</td>
+                <td class="status-remove">✕ Remove</td>
+                <td><span class="reason-icon" data-reason="DB users don't need upsell; per Jenny's P0 plan">?</span></td>
+            </tr>
+            <tr class="row-remove">
+                <td>InformBannerVariant4</td>
+                <td><span class="source-tag source-outlook">Outlook</span></td>
+                <td>Banner</td>
+                <td>✓ Exists in code</td>
+                <td class="status-remove">✕ Remove</td>
+                <td><span class="reason-icon" data-reason="DB users don't need upsell; per Jenny's P0 plan">?</span></td>
+            </tr>
+            <tr class="row-remove">
+                <td>InformPromptVariant1</td>
+                <td><span class="source-tag source-outlook">Outlook</span></td>
+                <td>Flyout</td>
+                <td>✓ Exists in code</td>
+                <td class="status-remove">✕ Remove</td>
+                <td><span class="reason-icon" data-reason="Flyout deprecated; intrusive format">?</span></td>
+            </tr>
+            <tr class="row-remove">
+                <td>InformPromptVariant2</td>
+                <td><span class="source-tag source-outlook">Outlook</span></td>
+                <td>Flyout</td>
+                <td>✓ Exists in code</td>
+                <td class="status-remove">✕ Remove</td>
+                <td><span class="reason-icon" data-reason="Flyout deprecated; intrusive format">?</span></td>
+            </tr>
+            <tr class="row-remove">
+                <td>InformPromptVariant3</td>
+                <td><span class="source-tag source-outlook">Outlook</span></td>
+                <td>Flyout</td>
+                <td>✓ Exists in code</td>
+                <td class="status-remove">✕ Remove</td>
+                <td><span class="reason-icon" data-reason="Flyout deprecated; intrusive format">?</span></td>
+            </tr>
+            <tr class="row-remove">
+                <td>InformPromptVariant4</td>
                 <td><span class="source-tag source-outlook">Outlook</span></td>
                 <td>Flyout</td>
                 <td>✓ Exists in code</td>
@@ -491,7 +539,7 @@
     </div>
     <div class="category-body">
         <div class="decision-box">
-            <strong>Decision:</strong> Keep only <strong>Variant1</strong> for each source. Banners used for ALL 4 impressions (replacing flyouts). Current code has 6 OptOut Banner variants total.
+            <strong>Decision:</strong> Keep only <strong>Variant1</strong> for each source. Banners used for 1st impression only. Current code has 6 OptOut Banner variants total.
         </div>
         <table>
             <tr>
@@ -551,13 +599,13 @@
     <div class="category-header" onclick="toggleCategory(this)">
         <div class="category-title">
             3. OptOut Flyout/Prompt — Non-DB Users (2nd-4th prompt)
-            <span class="badge badge-remove">REMOVE ALL</span>
+            <span class="badge badge-simplify">SIMPLIFY</span>
         </div>
         <span class="arrow">▼</span>
     </div>
     <div class="category-body">
         <div class="decision-box">
-            <strong>Decision:</strong> Remove ALL flyout/prompt variants. Current flow: 1st=Banner, 2nd-4th=Flyout. New plan: ALL 4 impressions use Banner V1 only. Flyouts are intrusive & verbose.
+            <strong>Decision:</strong> Keep only <strong>Variant1</strong> for each source (highest accept rate). Current flow: 1st=Banner, 2nd-4th=Flyout. New plan: keep Banner→Flyout flow, but only V1 per source. Remove redundant variants.
         </div>
         <table>
             <tr>
@@ -567,12 +615,12 @@
                 <th>Action</th>
                 <th>Reason</th>
             </tr>
-            <tr class="row-remove">
-                <td>OptOutVariant1</td>
+            <tr class="row-keep">
+                <td><strong>OptOutVariant1</strong></td>
                 <td><span class="source-tag source-outlook">Outlook</span></td>
                 <td>✓ Exists in code</td>
-                <td class="status-remove">✕ Remove</td>
-                <td><span class="reason-icon" data-reason="Flyout type deprecated; replace with banner">?</span></td>
+                <td class="status-keep">✓ KEEP</td>
+                <td><span class="reason-icon" data-reason="Highest accept rate (35.1%); largest sample; used for 2nd-4th impression">?</span></td>
             </tr>
             <tr class="row-remove">
                 <td>OptOutVariant2</td>
@@ -602,12 +650,12 @@
                 <td class="status-remove">✕ Remove</td>
                 <td><span class="reason-icon" data-reason="Last-resort BingAI flyout; deprecated">?</span></td>
             </tr>
-            <tr class="row-remove">
-                <td>TeamsOptOutVariant1</td>
+            <tr class="row-keep">
+                <td><strong>TeamsOptOutVariant1</strong></td>
                 <td><span class="source-tag source-teams">Teams</span></td>
                 <td>✓ Exists in code</td>
-                <td class="status-remove">✕ Remove</td>
-                <td><span class="reason-icon" data-reason="Flyout type deprecated; replace with banner">?</span></td>
+                <td class="status-keep">✓ KEEP</td>
+                <td><span class="reason-icon" data-reason="Highest accept rate (34.9%); largest sample; used for 2nd-4th impression">?</span></td>
             </tr>
             <tr class="row-remove">
                 <td>TeamsOptOutVariant2</td>
@@ -794,23 +842,40 @@
             <th>Action</th>
         </tr>
         <tr class="row-remove"><td>InformBannerVariant1</td><td>M365OpenLinks_InformBannerVariant1</td><td><span class="source-tag source-outlook">OL</span></td><td>Banner</td><td>1,358,758</td><td>10,719</td><td>2,072</td><td>1,411</td><td>108</td><td class="status-remove">✕</td></tr>
-        <tr class="row-remove"><td>InformBannerVariant2-4</td><td>M365OpenLinks_InformBannerVariant2-4</td><td><span class="source-tag source-outlook">OL</span></td><td>Banner</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td class="status-remove">✕</td></tr>
-        <tr class="row-remove"><td>InformPromptVariant1-4</td><td>M365OpenLinks_InformVariant1-4</td><td><span class="source-tag source-outlook">OL</span></td><td>Flyout</td><td>2,324</td><td>1,801</td><td>871</td><td>855</td><td>62</td><td class="status-remove">✕</td></tr>
+        <tr class="row-remove"><td>InformBannerVariant2</td><td>M365OpenLinks_InformBannerVariant2</td><td><span class="source-tag source-outlook">OL</span></td><td>Banner</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td class="status-remove">✕</td></tr>
+        <tr class="row-remove"><td>InformBannerVariant3</td><td>M365OpenLinks_InformBannerVariant3</td><td><span class="source-tag source-outlook">OL</span></td><td>Banner</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td class="status-remove">✕</td></tr>
+        <tr class="row-remove"><td>InformBannerVariant4</td><td>M365OpenLinks_InformBannerVariant4</td><td><span class="source-tag source-outlook">OL</span></td><td>Banner</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td class="status-remove">✕</td></tr>
+        <tr class="row-remove"><td>InformPromptVariant1</td><td>M365OpenLinks_InformVariant1</td><td><span class="source-tag source-outlook">OL</span></td><td>Flyout</td><td>2,324</td><td>1,801</td><td>871</td><td>855</td><td>62</td><td class="status-remove">✕</td></tr>
+        <tr class="row-remove"><td>InformPromptVariant2</td><td>M365OpenLinks_InformVariant2</td><td><span class="source-tag source-outlook">OL</span></td><td>Flyout</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td class="status-remove">✕</td></tr>
+        <tr class="row-remove"><td>InformPromptVariant3</td><td>M365OpenLinks_InformVariant3</td><td><span class="source-tag source-outlook">OL</span></td><td>Flyout</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td class="status-remove">✕</td></tr>
+        <tr class="row-remove"><td>InformPromptVariant4</td><td>M365OpenLinks_InformVariant4</td><td><span class="source-tag source-outlook">OL</span></td><td>Flyout</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td class="status-remove">✕</td></tr>
         <tr class="row-remove"><td>TeamsInformBanner</td><td>M365OpenLinks_TeamsInformBanner</td><td><span class="source-tag source-teams">TM</span></td><td>Banner</td><td>1,126,772</td><td>19,922</td><td>4,069</td><td>2,903</td><td>215</td><td class="status-remove">✕</td></tr>
         <tr class="row-remove"><td>TeamsInformPrompt</td><td>M365OpenLinks_TeamsInformPrompt</td><td><span class="source-tag source-teams">TM</span></td><td>Flyout</td><td>3,253</td><td>2,548</td><td>1,150</td><td>1,272</td><td>37</td><td class="status-remove">✕</td></tr>
         <tr style="background:#f5f7fa"><td colspan="10" style="font-weight:600;color:#555;padding:12px">OptOut Banner</td></tr>
         <tr class="row-keep"><td><strong>TeamsOptOutBannerV1</strong></td><td>M365OpenLinks_TeamsOptOutBannerVariant1</td><td><span class="source-tag source-teams">TM</span></td><td>Banner</td><td>184,905</td><td>160,402</td><td>13,989</td><td>6,362</td><td>5,609</td><td class="status-keep">✓</td></tr>
         <tr class="row-remove"><td>TeamsOptOutBannerV2</td><td>M365OpenLinks_TeamsOptOutBannerVariant2</td><td><span class="source-tag source-teams">TM</span></td><td>Banner</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td class="status-remove">✕</td></tr>
         <tr class="row-keep"><td><strong>OptOutBannerV1</strong></td><td>M365OpenLinks_OptOutBannerVariant1</td><td><span class="source-tag source-outlook">OL</span></td><td>Banner</td><td>56,248</td><td>54,319</td><td>5,359</td><td>3,854</td><td>807</td><td class="status-keep">✓</td></tr>
-        <tr class="row-remove"><td>OptOutBannerV2-3</td><td>M365OpenLinks_OptOutBannerVariant2-3</td><td><span class="source-tag source-outlook">OL</span></td><td>Banner</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td class="status-remove">✕</td></tr>
+        <tr class="row-remove"><td>OptOutBannerV2</td><td>M365OpenLinks_OptOutBannerVariant2</td><td><span class="source-tag source-outlook">OL</span></td><td>Banner</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td class="status-remove">✕</td></tr>
+        <tr class="row-remove"><td>OptOutBannerV3</td><td>M365OpenLinks_OptOutBannerVariant3</td><td><span class="source-tag source-outlook">OL</span></td><td>Banner</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td class="status-remove">✕</td></tr>
         <tr class="row-remove"><td>OptOutBannerV4</td><td>M365OpenLinks_OptOutBannerVariant4</td><td><span class="source-tag source-outlook">OL</span></td><td>Banner</td><td>19,239</td><td>18,493</td><td>1,126</td><td>1,023</td><td>330</td><td class="status-remove">✕</td></tr>
-        <tr style="background:#f5f7fa"><td colspan="10" style="font-weight:600;color:#555;padding:12px">OptOut Flyout (ALL REMOVED)</td></tr>
-        <tr class="row-remove"><td>TeamsOptOutPromptV1</td><td>M365OpenLinks_TeamsOptOutVariant1</td><td><span class="source-tag source-teams">TM</span></td><td>Flyout</td><td>203,507</td><td>130,700</td><td>45,580</td><td>22,668</td><td>59,046</td><td class="status-remove">✕</td></tr>
+        <tr style="background:#f5f7fa"><td colspan="10" style="font-weight:600;color:#555;padding:12px">OptOut Flyout (Keep V1 per source)</td></tr>
+        <tr class="row-keep"><td><strong>TeamsOptOutPromptV1</strong></td><td>M365OpenLinks_TeamsOptOutVariant1</td><td><span class="source-tag source-teams">TM</span></td><td>Flyout</td><td>203,507</td><td>130,700</td><td>45,580</td><td>22,668</td><td>59,046</td><td class="status-keep">✓</td></tr>
+        <tr class="row-remove"><td>TeamsOptOutPromptV2</td><td>M365OpenLinks_TeamsOptOutVariant2</td><td><span class="source-tag source-teams">TM</span></td><td>Flyout</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td class="status-remove">✕</td></tr>
         <tr class="row-remove"><td>TeamsOptOutPromptV3</td><td>M365OpenLinks_TeamsOptOutVariant3</td><td><span class="source-tag source-teams">TM</span></td><td>Flyout</td><td>47,188</td><td>28,377</td><td>8,732</td><td>5,329</td><td>17,087</td><td class="status-remove">✕</td></tr>
-        <tr class="row-remove"><td>OptOutPromptV1</td><td>M365OpenLinks_OptOutVariant1</td><td><span class="source-tag source-outlook">OL</span></td><td>Flyout</td><td>65,771</td><td>50,531</td><td>17,724</td><td>13,036</td><td>14,119</td><td class="status-remove">✕</td></tr>
+        <tr class="row-keep"><td><strong>OptOutPromptV1</strong></td><td>M365OpenLinks_OptOutVariant1</td><td><span class="source-tag source-outlook">OL</span></td><td>Flyout</td><td>65,771</td><td>50,531</td><td>17,724</td><td>13,036</td><td>14,119</td><td class="status-keep">✓</td></tr>
+        <tr class="row-remove"><td>OptOutPromptV2</td><td>M365OpenLinks_OptOutVariant2</td><td><span class="source-tag source-outlook">OL</span></td><td>Flyout</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td class="status-remove">✕</td></tr>
         <tr class="row-remove"><td>OptOutPromptV3</td><td>M365OpenLinks_OptOutVariant3</td><td><span class="source-tag source-outlook">OL</span></td><td>Flyout</td><td>12,981</td><td>9,527</td><td>2,794</td><td>2,848</td><td>3,377</td><td class="status-remove">✕</td></tr>
         <tr class="row-remove"><td>OptOutPromptV4</td><td>M365OpenLinks_OptOutVariant4</td><td><span class="source-tag source-outlook">OL</span></td><td>Flyout</td><td>24,180</td><td>19,870</td><td>5,900</td><td>4,675</td><td>3,544</td><td class="status-remove">✕</td></tr>
         <tr class="row-remove"><td>OptOutLastFlyOutBing</td><td>M365OpenLinks_OptOutLastFlyOutBingVariant</td><td><span class="source-tag source-outlook">OL</span></td><td>Flyout</td><td>5,046</td><td>4,119</td><td>948</td><td>1,012</td><td>891</td><td class="status-remove">✕</td></tr>
+        <tr style="background:#f5f7fa"><td colspan="10" style="font-weight:600;color:#555;padding:12px">OptOut Sidebar (ALL REMOVED)</td></tr>
+        <tr class="row-remove"><td>OptOutSidebarAlwaysShow</td><td>M365OpenLinks_OptOutSidebarAlwaysShow</td><td><span class="source-tag source-outlook">OL</span></td><td>Sidebar</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td class="status-remove">✕</td></tr>
+        <tr class="row-remove"><td>OptOutSidebarAutoHide</td><td>M365OpenLinks_OptOutSidebarAutoHide</td><td><span class="source-tag source-outlook">OL</span></td><td>Sidebar</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td class="status-remove">✕</td></tr>
+        <tr class="row-remove"><td>OptOutSidebarAlwaysShowLast</td><td>M365OpenLinks_OptOutSidebarAlwaysShowLast</td><td><span class="source-tag source-outlook">OL</span></td><td>Sidebar</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td class="status-remove">✕</td></tr>
+        <tr class="row-remove"><td>OptOutSidebarAutoHideLast</td><td>M365OpenLinks_OptOutSidebarAutoHideLast</td><td><span class="source-tag source-outlook">OL</span></td><td>Sidebar</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td class="status-remove">✕</td></tr>
+        <tr style="background:#f5f7fa"><td colspan="10" style="font-weight:600;color:#555;padding:12px">OptOut Modal (ALL REMOVED)</td></tr>
+        <tr class="row-remove"><td>OptOutModalVariant1</td><td>M365OpenLinks_OptOutModalVariant1</td><td><span class="source-tag source-outlook">OL</span></td><td>Modal</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td class="status-remove">✕</td></tr>
+        <tr class="row-remove"><td>OptOutModalVariant2</td><td>M365OpenLinks_OptOutModalVariant2</td><td><span class="source-tag source-outlook">OL</span></td><td>Modal</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td class="status-remove">✕</td></tr>
+        <tr class="row-remove"><td>OptOutModalVariant4</td><td>M365OpenLinks_OptOutModalVariant4</td><td><span class="source-tag source-outlook">OL</span></td><td>Modal</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td class="status-remove">✕</td></tr>
         <tr style="background:#f5f7fa"><td colspan="10" style="font-weight:600;color:#555;padding:12px">Managed / Settings</td></tr>
         <tr class="row-keep"><td><strong>ManagedBanner</strong></td><td>M365OpenLinks_ManagedBanner</td><td><span class="source-tag source-outlook">OL</span></td><td>Banner</td><td>6,206</td><td>727</td><td>18</td><td>185</td><td>7</td><td class="status-keep">✓</td></tr>
         <tr class="row-keep"><td><strong>TeamsManagedBanner</strong></td><td>M365OpenLinks_TeamsManagedBanner</td><td><span class="source-tag source-teams">TM</span></td><td>Banner</td><td>552</td><td>340</td><td>7</td><td>89</td><td>0</td><td class="status-keep">✓</td></tr>
@@ -841,22 +906,22 @@
                     <span class="flow-arrow">→</span>
                     <div class="flow-step cap">Cap Reached<span class="flow-label">Auto-select Edge</span></div>
                 </div>
-                <p style="font-size:13px;color:#666;margin-top:8px">+ Reprompt flow (fixed V1) + BingAI treatment + Sidebar treatment (4 variants) + Modal fallback (3 variants) = <strong>25 variants in current code</strong></p>
+                <p style="font-size:13px;color:#666;margin-top:8px">+ Reprompt flow (fixed V1) + BingAI treatment + Sidebar treatment (4 variants) + Modal fallback (3 variants) = <strong>34 campaigns in current code</strong></p>
             </div>
             <div class="flow-column after">
-                <h4>✅ After (Simple, banner only)</h4>
+                <h4>✅ After (Simplified, fixed variants)</h4>
                 <div class="flow-box">
                     <div class="flow-step banner">1st: Banner V1<span class="flow-label">Fixed</span></div>
                     <span class="flow-arrow">→</span>
-                    <div class="flow-step banner">2nd: Banner V1<span class="flow-label">Fixed</span></div>
+                    <div class="flow-step flyout">2nd: Flyout V1<span class="flow-label">Fixed</span></div>
                     <span class="flow-arrow">→</span>
-                    <div class="flow-step banner">3rd: Banner V1<span class="flow-label">Fixed</span></div>
+                    <div class="flow-step flyout">3rd: Flyout V1<span class="flow-label">Fixed</span></div>
                     <span class="flow-arrow">→</span>
-                    <div class="flow-step banner">4th: Banner V1<span class="flow-label">Fixed</span></div>
+                    <div class="flow-step flyout">4th: Flyout V1<span class="flow-label">Fixed</span></div>
                     <span class="flow-arrow">→</span>
                     <div class="flow-step cap">Cap Reached<span class="flow-label">Auto-select Edge</span></div>
                 </div>
-                <p style="font-size:13px;color:#666;margin-top:8px">1 variant per source × 2 sources = <strong>2 paths total</strong></p>
+                <p style="font-size:13px;color:#666;margin-top:8px">1 Banner V1 + 1 Flyout V1 per source × 2 sources = <strong>4 variants total</strong></p>
             </div>
         </div>
 
@@ -884,23 +949,23 @@
 <div class="impact-grid">
     <div class="impact-card">
         <h4>Variants Removed</h4>
-        <div class="value red">20</div>
-        <div class="detail">From 25 variants down to 5 (based on current codebase)</div>
+        <div class="value red">27</div>
+        <div class="detail">From 34 campaigns down to 7</div>
     </div>
     <div class="impact-card">
         <h4>Code Complexity Reduction</h4>
-        <div class="value green">~80%</div>
-        <div class="detail">Remove random selection, treatment branching, sidebar/modal/flyout paths</div>
+        <div class="value green">~79%</div>
+        <div class="detail">Remove random selection, treatment branching, sidebar/modal paths, extra flyout variants</div>
     </div>
     <div class="impact-card">
         <h4>Current Codebase Status</h4>
-        <div class="value blue">25</div>
-        <div class="detail">Total variants found in current campaigns_data.js (24 M365 + 1 FN)</div>
+        <div class="value blue">34</div>
+        <div class="detail">Total M365OpenLinks campaigns in codebase (33 + 1 FN settings view)</div>
     </div>
     <div class="impact-card">
         <h4>Variants to Keep</h4>
-        <div class="value green">5</div>
-        <div class="detail">2 Banner V1 + 2 Managed + 1 Settings = Core functionality only</div>
+        <div class="value green">7</div>
+        <div class="detail">2 Banner V1 + 2 Flyout V1 + 2 Managed + 1 Settings</div>
     </div>
     <div class="impact-card">
         <h4>Upsell/Inform Variants</h4>
@@ -908,9 +973,9 @@
         <div class="detail">All 4 Banner + 4 Flyout + 2 Teams variants to be removed</div>
     </div>
     <div class="impact-card">
-        <h4>Intrusive UI Types</h4>
-        <div class="value red">15</div>
-        <div class="detail">8 Flyout + 3 Modal + 4 Sidebar variants to be removed</div>
+        <h4>Intrusive UI Types Removed</h4>
+        <div class="value red">17</div>
+        <div class="detail">6 extra Flyout + 3 Modal + 4 Sidebar + 4 extra Banner variants to be removed</div>
     </div>
 </div>
 
@@ -927,9 +992,9 @@
                 <td>Edge-DB users don't need "use Edge" prompts. Low value, causes notification fatigue. Per product requirements.</td>
             </tr>
             <tr>
-                <td><strong>OptOut Flyout (all)</strong></td>
-                <td>8 variants</td>
-                <td>Intrusive & verbose format. High error rates reported in telemetry. High dismiss rates. Replace with less intrusive banners.</td>
+                <td><strong>OptOut Flyout (extra variants)</strong></td>
+                <td>6 variants</td>
+                <td>Keep V1 per source (highest accept rate). Remove V2-V4, BingAI, and last-resort variants. A/B testing complete.</td>
             </tr>
             <tr>
                 <td><strong>OptOut Sidebar (all)</strong></td>
@@ -939,7 +1004,7 @@
             <tr>
                 <td><strong>OptOut Modal (all)</strong></td>
                 <td>3 variants</td>
-                <td>Most intrusive format. "Last resort" no longer needed with 4x banner cap. Causes highest user dissatisfaction.</td>
+                <td>Most intrusive format. "Last resort" no longer needed with 4x flyout cap. Causes highest user dissatisfaction.</td>
             </tr>
             <tr>
                 <td><strong>Extra Banner Variants</strong></td>
@@ -957,8 +1022,10 @@
     <div class="category-body">
         <table>
             <tr><th>Variant</th><th>Reason for Keeping</th></tr>
-            <tr><td><strong>TeamsOptOutBannerVariant1</strong></td><td>Primary Teams banner; reliable banner format; used by reprompt flow; represents Teams source in simplified flow</td></tr>
-            <tr><td><strong>OptOutBannerVariant1</strong></td><td>Primary Outlook banner; used by reprompt flow; represents Outlook source in simplified flow; consistent with Teams approach</td></tr>
+            <tr><td><strong>TeamsOptOutBannerVariant1</strong></td><td>Primary Teams banner for 1st impression; reliable banner format; used by reprompt flow</td></tr>
+            <tr><td><strong>OptOutBannerVariant1</strong></td><td>Primary Outlook banner for 1st impression; used by reprompt flow; consistent with Teams approach</td></tr>
+            <tr><td><strong>TeamsOptOutVariant1 (Flyout)</strong></td><td>Primary Teams flyout for 2nd-4th impression; highest accept rate (34.9%); largest sample size (130K shown)</td></tr>
+            <tr><td><strong>OptOutVariant1 (Flyout)</strong></td><td>Primary Outlook flyout for 2nd-4th impression; highest accept rate (35.1%); largest sample size (50K shown)</td></tr>
             <tr><td><strong>ManagedBanner</strong></td><td>Required for enterprise-managed devices (policy-driven); distinct Outlook source needed for compliance</td></tr>
             <tr><td><strong>TeamsManagedBanner</strong></td><td>Required for enterprise-managed devices (policy-driven); distinct Teams source needed for compliance</td></tr>
             <tr><td><strong>M365LinksOptOutAdjustSettingView</strong></td><td>Only entry point for users to change M365 Links setting post-prompt; critical for user control and settings management</td></tr>
@@ -974,8 +1041,8 @@
     <div class="category-header">
         <div class="category-title">
             UI Variants Preview
-            <span class="badge badge-keep">Keep 5</span>
-            <span class="badge badge-remove">Remove 20</span>
+            <span class="badge badge-keep">Keep 7</span>
+            <span class="badge badge-remove">Remove 27</span>
         </div>
     </div>
     <div class="category-body">
@@ -984,7 +1051,7 @@
         <!-- Keep Section -->
         <div class="preview-section keep-section">
             <h3 style="color:#1e7e34;margin-bottom:16px;display:flex;align-items:center;gap:8px">
-                <span class="badge badge-keep">✓ KEEP (5 variants)</span>
+                <span class="badge badge-keep">✓ KEEP (7 variants)</span>
             </h3>
             <div class="preview-grid" id="keepGrid">
                 <!-- Will be populated by JavaScript -->
@@ -994,7 +1061,7 @@
         <!-- Remove Section -->
         <div class="preview-section remove-section" style="margin-top:32px">
             <h3 style="color:#c62828;margin-bottom:16px;display:flex;align-items:center;gap:8px">
-                <span class="badge badge-remove">✕ REMOVE (20 variants)</span>
+                <span class="badge badge-remove">✕ REMOVE (27 variants)</span>
             </h3>
 
             <!-- Upsell/Inform -->
@@ -1007,7 +1074,7 @@
 
             <!-- OptOut Flyout -->
             <div class="preview-subsection">
-                <h4 style="color:#c62828;margin-bottom:12px;font-size:14px">OptOut Flyout (8 variants)</h4>
+                <h4 style="color:#c62828;margin-bottom:12px;font-size:14px">OptOut Flyout (6 variants)</h4>
                 <div class="preview-grid" id="flyoutGrid">
                     <!-- Will be populated by JavaScript -->
                 </div>
@@ -1015,7 +1082,7 @@
 
             <!-- Other Removals -->
             <div class="preview-subsection">
-                <h4 style="color:#c62828;margin-bottom:12px;font-size:14px">Other (Modal + Sidebar + Extra Banner - 7 variants)</h4>
+                <h4 style="color:#c62828;margin-bottom:12px;font-size:14px">Other (Modal + Sidebar + Extra Banner - 11 variants)</h4>
                 <div class="preview-grid" id="otherGrid">
                     <!-- Will be populated by JavaScript -->
                 </div>
@@ -1064,6 +1131,8 @@ const variantConfig = {
     keep: [
         { id: 'M365OpenLinks_TeamsOptOutBannerVariant1', name: 'TeamsOptOutBannerVariant1', type: 'Banner', source: 'Teams' },
         { id: 'M365OpenLinks_OptOutBannerVariant1', name: 'OptOutBannerVariant1', type: 'Banner', source: 'Outlook' },
+        { id: 'M365OpenLinks_TeamsOptOutVariant1', name: 'TeamsOptOutPromptVariant1', type: 'Flyout', source: 'Teams' },
+        { id: 'M365OpenLinks_OptOutVariant1', name: 'OptOutPromptVariant1', type: 'Flyout', source: 'Outlook' },
         { id: 'M365OpenLinks_ManagedBanner', name: 'ManagedBanner', type: 'Banner', source: 'Outlook' },
         { id: 'M365OpenLinks_TeamsManagedBanner', name: 'TeamsManagedBanner', type: 'Banner', source: 'Teams' },
         { id: 'FN_M365LinksOptOutAdjustSettingView', name: 'M365LinksOptOutAdjustSettingView', type: 'FN', source: 'Settings' }
@@ -1082,12 +1151,10 @@ const variantConfig = {
             { id: 'M365OpenLinks_TeamsInformPrompt', name: 'TeamsInformPrompt', type: 'Flyout', source: 'Teams' }
         ],
         flyout: [
-            { id: 'M365OpenLinks_OptOutVariant1', name: 'OptOutPromptVariant1', type: 'Flyout', source: 'Outlook' },
             { id: 'M365OpenLinks_OptOutVariant2', name: 'OptOutPromptVariant2', type: 'Flyout', source: 'Outlook' },
             { id: 'M365OpenLinks_OptOutVariant3', name: 'OptOutPromptVariant3', type: 'Flyout', source: 'Outlook' },
             { id: 'M365OpenLinks_OptOutVariant4', name: 'OptOutPromptVariant4', type: 'Flyout', source: 'Outlook' },
             { id: 'M365OpenLinks_OptOutLastFlyOutBingVariant', name: 'OptOutLastFlyOutBingVariant', type: 'Flyout', source: 'Outlook' },
-            { id: 'M365OpenLinks_TeamsOptOutVariant1', name: 'TeamsOptOutPromptVariant1', type: 'Flyout', source: 'Teams' },
             { id: 'M365OpenLinks_TeamsOptOutVariant2', name: 'TeamsOptOutPromptVariant2', type: 'Flyout', source: 'Teams' },
             { id: 'M365OpenLinks_TeamsOptOutVariant3', name: 'TeamsOptOutPromptVariant3', type: 'Flyout', source: 'Teams' }
         ],
@@ -1098,7 +1165,11 @@ const variantConfig = {
             { id: 'M365OpenLinks_TeamsOptOutBannerVariant2', name: 'TeamsOptOutBannerVariant2', type: 'Banner', source: 'Teams' },
             { id: 'M365OpenLinks_OptOutModalVariant1', name: 'OptOutModalVariant1', type: 'Modal', source: 'Outlook' },
             { id: 'M365OpenLinks_OptOutModalVariant2', name: 'OptOutModalVariant2', type: 'Modal', source: 'Outlook' },
-            { id: 'M365OpenLinks_OptOutModalVariant4', name: 'OptOutModalVariant4', type: 'Modal', source: 'Outlook' }
+            { id: 'M365OpenLinks_OptOutModalVariant4', name: 'OptOutModalVariant4', type: 'Modal', source: 'Outlook' },
+            { id: 'M365OpenLinks_OptOutSidebarAlwaysShow', name: 'OptOutSidebarAlwaysShow', type: 'Sidebar', source: 'Outlook' },
+            { id: 'M365OpenLinks_OptOutSidebarAutoHide', name: 'OptOutSidebarAutoHide', type: 'Sidebar', source: 'Outlook' },
+            { id: 'M365OpenLinks_OptOutSidebarAlwaysShowLast', name: 'OptOutSidebarAlwaysShowLast', type: 'Sidebar', source: 'Outlook' },
+            { id: 'M365OpenLinks_OptOutSidebarAutoHideLast', name: 'OptOutSidebarAutoHideLast', type: 'Sidebar', source: 'Outlook' }
         ]
     }
 };
