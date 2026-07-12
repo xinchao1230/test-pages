@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<!--
+  User-activation propagation & consumption test page.
+
+  WHAT THIS VERIFIES (empirically, in your real browser):
+    1. Transient user activation is TIME-BASED (~5s on desktop, kActivationLifespan
+       = base::Seconds(5)), NOT "lost on the first await".
+    2. window.open() CONSUMES the activation -> a second immediate open is blocked.
+    3. Activation older than ~5s is expired -> open is blocked.
+    4. A user click inside a (cross-origin) CHILD IFRAME propagates activation to
+       the TOP frame, so the top frame's window.open is allowed (this is why the
+       EasyAuth button flow mostly works WITHOUT the about:blank#quickAuthPopup
+       magic URL). Frame::NotifyUserActivationInFrameTree walks up to ancestors.
+
+  HOW TO RUN (so the popup blocker is actually engaged):
+    - Do NOT open via file:// . Serve over http and load in Edge/Chrome:
+        cd services/EasyAuth/repro
+        python -m http.server 8000
+        # open http://localhost:8000/activation-propagation-test.html
+    - Make sure the popup blocker is ON (default). "Blocked" = window.open returned null.
+
+  OPTIONAL — TRUE CROSS-ORIGIN child (out-of-process iframe):
+    - Serve the iframe from a different port and pass it via ?iframe=URL, e.g.:
+        python -m http.server 8001   (in the same folder, second terminal)
+        # open http://localhost:8000/activation-propagation-test.html?iframe=http://127.0.0.1:8001/activation-propagation-iframe.html
+    - 127.0.0.1 vs localhost (or different ports) = different origin => real OOPIF.
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>User activation: cross-iframe propagation & async loss test</title>
+  <style>
+    body { font: 14px/1.5 system-ui, sans-serif; margin: 18px; color: #123; max-width: 1000px; }
+    h1 { font-size: 19px; } h2 { font-size: 15px; margin: 18px 0 6px; }
+    .row { display: flex; gap: 18px; flex-wrap: wrap; }
+    .col { flex: 1 1 380px; }
+    button { margin: 5px 0; padding: 8px 10px; cursor: pointer; width: 100%; text-align: left; }
+    iframe { width: 100%; height: 240px; border: 2px solid #6699cc; border-radius: 6px; }
+    #log { width: 100%; height: 320px; font-family: ui-monospace, monospace; font-size: 12px;
+           white-space: pre; overflow: auto; background: #0b1021; color: #cfe; border-radius: 6px;
+           padding: 8px; box-sizing: border-box; }
+    .ok { color: #2e7d32; font-weight: bold; } .bad { color: #c62828; font-weight: bold; }
+    .live { font-family: ui-monospace, monospace; background: #f3f6ff; border: 1px solid #ccd;
+            padding: 6px 8px; border-radius: 5px; display: inline-block; }
+    small { color: #567; }
+    .hint { background: #fff8e1; border: 1px solid #ffe082; padding: 6px 10px; border-radius: 5px; }
+  </style>
+</head>
+<body>
+  <h1>User activation — cross-iframe propagation &amp; async-loss test</h1>
+  <p class="hint">Serve over <b>http://</b> (not file://) with the popup blocker <b>ON</b>.
+    A popup is <span class="ok">ALLOWED</span> when <code>window.open</code> returns a window,
+    <span class="bad">BLOCKED</span> when it returns <code>null</code>.
+    Each test logs <code>navigator.userActivation.isActive</code> at the moment of the open.</p>
+
+  <div class="live" id="live">live userActivation: —</div>
+
+  <div class="row">
+    <div class="col">
+      <h2>A. Parent-only (baseline: no iframe)</h2>
+      <small>Reveals that activation is time-based (5s) and consumed by open — NOT lost on any await.</small>
+      <button data-t="sync">A1 · click → open <b>immediately</b> (expect ALLOWED)</button>
+      <button data-t="double">A2 · click → open, then open <b>again</b> (2nd expect BLOCKED — open consumes activation)</button>
+      <button data-t="micro">A3 · click → <code>await Promise.resolve()</code> → open (expect ALLOWED — microtask, still active)</button>
+      <button data-t="t0">A4 · click → <code>await setTimeout(0)</code> → open (expect ALLOWED — still within 5s)</button>
+      <button data-t="t2000">A5 · click → <code>await setTimeout(2000)</code> → open (expect ALLOWED — 2s &lt; 5s)</button>
+      <button data-t="fetch">A6 · click → <code>await fetch()</code> → open (expect ALLOWED if fast — 5s covers round-trips)</button>
+      <button data-t="t6000">A7 · click → <code>await setTimeout(6000)</code> → open (expect BLOCKED — &gt; 5s lifespan)</button>
+      <button data-t="notrust">A8 · open with <b>NO click</b> (programmatic, like one-tap/startSignIn — expect BLOCKED)</button>
+      <button id="a8trigger" style="background:#ffecec">A8 trigger: run the no-click open now</button>
+    </div>
+
+    <div class="col">
+      <h2>B. Cross-iframe propagation</h2>
+      <small>Click inside the child frame. The child only forwards the click; the <b>parent</b> opens the popup —
+        mirroring EasyAuth (button iframe → RP top page → MSAL popup).</small>
+      <iframe id="frame" title="child"></iframe>
+      <div class="live" id="childstate">child: —</div>
+    </div>
+  </div>
+
+  <h2>Results log</h2>
+  <div id="log"></div>
+  <button id="clear" style="width:auto">Clear log</button>
+
+  <script>
+    const logEl = document.getElementById('log');
+    function ts() { return new Date().toISOString().substr(11, 12); }
+    function ua() {
+      const u = navigator.userActivation;
+      return u ? { isActive: u.isActive, hasBeenActive: u.hasBeenActive } : { isActive: 'n/a', hasBeenActive: 'n/a' };
+    }
+    function log(line, cls) {
+      const span = cls ? `<span class="${cls}">${line}</span>` : line;
+      logEl.innerHTML += span + '\n';
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+    // Live activation readout.
+    setInterval(() => {
+      const u = ua();
+      document.getElementById('live').textContent =
+        `live userActivation: isActive=${u.isActive}  hasBeenActive=${u.hasBeenActive}`;
+    }, 200);
+
+    // Core: attempt to open a popup and report whether the blocker allowed it.
+    function tryOpen(tag) {
+      const before = ua();
+      const w = window.open('about:blank', '_blank', 'width=200,height=150');
+      const allowed = !!w;
+      if (w) { try { w.close(); } catch (e) {} }
+      log(`[${ts()}] ${tag}  isActive(before open)=${before.isActive}  ->  ` +
+          (allowed ? 'ALLOWED ✅' : 'BLOCKED ❌'), allowed ? 'ok' : 'bad');
+      return allowed;
+    }
+
+    const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
+    async function runParentTest(t) {
+      switch (t) {
+        case 'sync':
+          tryOpen('A1 sync');
+          break;
+        case 'double':
+          tryOpen('A2 first');
+          tryOpen('A2 second');
+          break;
+        case 'micro':
+          await Promise.resolve();
+          tryOpen('A3 after microtask');
+          break;
+        case 't0':
+          await sleep(0);
+          tryOpen('A4 after setTimeout(0)');
+          break;
+        case 't2000':
+          log(`[${ts()}] A5 waiting 2000ms...`);
+          await sleep(2000);
+          tryOpen('A5 after 2000ms');
+          break;
+        case 'fetch':
+          log(`[${ts()}] A6 awaiting fetch...`);
+          try { await fetch(location.href, { cache: 'no-store' }); } catch (e) {}
+          tryOpen('A6 after fetch');
+          break;
+        case 't6000':
+          log(`[${ts()}] A7 waiting 6000ms (> 5s lifespan)...`);
+          await sleep(6000);
+          tryOpen('A7 after 6000ms');
+          break;
+        case 'notrust':
+          log(`[${ts()}] A8: use the red "A8 trigger" button, or wait — running in 1s with NO fresh click...`);
+          break;
+      }
+    }
+
+    document.querySelectorAll('button[data-t]').forEach(btn => {
+      btn.addEventListener('click', () => runParentTest(btn.getAttribute('data-t')));
+    });
+
+    // A8: programmatic open with no user gesture at all (simulates one-tap / startSignIn).
+    document.getElementById('a8trigger').addEventListener('click', () => {
+      // Defer to a timer so the click's activation is gone by the time we open.
+      log(`[${ts()}] A8: scheduling a NO-gesture open in 100ms (timer callback, no activation)...`);
+      setTimeout(() => tryOpen('A8 programmatic (no gesture)'), 6000);
+    });
+
+    document.getElementById('clear').addEventListener('click', () => (logEl.innerHTML = ''));
+
+    // ---- Cross-iframe wiring ----
+    const params = new URLSearchParams(location.search);
+    const iframeSrc = params.get('iframe') || 'activation-propagation-iframe.html';
+    const frame = document.getElementById('frame');
+    frame.src = iframeSrc;
+    log(`[${ts()}] child iframe src = ${iframeSrc}`);
+
+    window.addEventListener('message', async (e) => {
+      const d = e.data;
+      if (!d || d.type !== 'child-open-request') return;
+      document.getElementById('childstate').textContent =
+        `child reported isActive=${d.childActive} (origin ${e.origin})`;
+      const parentBefore = ua();
+      log(`[${ts()}] B: message from child (childActive=${d.childActive}); ` +
+          `PARENT isActive on receipt=${parentBefore.isActive}`);
+      if (d.mode === 'sync') {
+        tryOpen('B sync (iframe click → parent open)');
+      } else if (d.mode === 'await-fast') {
+        await Promise.resolve();
+        await sleep(0);
+        tryOpen('B after fast await (iframe click → parent open)');
+      } else if (d.mode === 'delay6000') {
+        log(`[${ts()}] B waiting 6000ms before open (> 5s)...`);
+        await sleep(6000);
+        tryOpen('B after 6000ms (iframe click → parent open)');
+      }
+    });
+  </script>
+</body>
+</html>

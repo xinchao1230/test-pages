@@ -129,6 +129,12 @@
                 <p>A unified testing page that combines alert on unload, window opening on unload, and auto-close functionalities. Features multiple unload modes, delayed operations, and background testing capabilities. Must be opened in IE mode for full functionality testing.</p>
                 <a href="ComprehensiveWindowTest.html" class="page-link">View Page</a>
             </div>
+
+            <div class="page-card">
+                <h2>User Activation Propagation Test</h2>
+                <p>Empirically verifies the browser's transient user-activation model: the ~5s lifespan, that window.open consumes activation, and that a click inside a (cross-origin) child iframe propagates activation to the top frame. Serve over http:// with the popup blocker on. Reads navigator.userActivation and detects blocked popups via window.open returning null.</p>
+                <a href="activation-propagation-test.html" class="page-link">View Page</a>
+            </div>
         </div>
 
         <div class="screenshot-section">

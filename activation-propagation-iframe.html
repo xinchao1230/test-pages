@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<!--
+  Child iframe page for the user-activation propagation test.
+  Serve this (optionally from a DIFFERENT origin/port) and load it from
+  activation-propagation-test.html to test cross-origin OOPIF behavior.
+
+  Role: this page ONLY detects the click and forwards it to the parent via
+  postMessage. It NEVER calls window.open itself. This mirrors how the EasyAuth
+  button iframe (edge-auth.microsoft.com) forwards 'sign-in-clicked' to the RP
+  top page, which is the frame that actually opens the MSAL popup.
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Activation test — child iframe</title>
+  <style>
+    body { font: 13px/1.4 system-ui, sans-serif; margin: 10px; background: #eef4ff; color: #123; }
+    h3 { margin: 4px 0 8px; }
+    button { display: block; width: 100%; margin: 6px 0; padding: 8px; cursor: pointer; }
+    .state { font-family: ui-monospace, monospace; background: #fff; border: 1px solid #ccd; padding: 4px 6px; border-radius: 4px; }
+    small { color: #567; }
+  </style>
+</head>
+<body>
+  <h3>Child iframe (origin: <span id="origin"></span>)</h3>
+  <p><small>Click a button. This frame records its own activation, then asks the
+    PARENT to open the popup. The parent is the frame that calls window.open.</small></p>
+
+  <button id="sync">Click me → ask parent to open popup <b>SYNC</b></button>
+  <button id="delay">Click me → ask parent to open popup after <b>6s delay</b> (&gt; 5s lifespan)</button>
+  <button id="parentawait">Click me → ask parent to open popup after <b>await (fast)</b></button>
+
+  <div class="state" id="state">userActivation: (not yet)</div>
+
+  <script>
+    document.getElementById('origin').textContent = location.origin;
+
+    function ua() {
+      const u = navigator.userActivation;
+      return u ? { isActive: u.isActive, hasBeenActive: u.hasBeenActive } : { isActive: 'n/a', hasBeenActive: 'n/a' };
+    }
+
+    function send(mode) {
+      const state = ua();
+      document.getElementById('state').textContent =
+        `at click (child): isActive=${state.isActive}  hasBeenActive=${state.hasBeenActive}`;
+      // Forward to parent, exactly like the EasyAuth button iframe forwards the click.
+      parent.postMessage({ type: 'child-open-request', mode, childActive: state.isActive }, '*');
+    }
+
+    document.getElementById('sync').addEventListener('click', () => send('sync'));
+    document.getElementById('delay').addEventListener('click', () => send('delay6000'));
+    document.getElementById('parentawait').addEventListener('click', () => send('await-fast'));
+  </script>
+</body>
+</html>
